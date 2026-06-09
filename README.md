@@ -84,4 +84,4 @@ This app uses free OpenStreetMap-based services. Distance and fuel cost are esti
 
 ## Author
 
-Developed by [Your Name]
+Developed by Asad Abbas.

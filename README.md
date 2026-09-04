@@ -1,87 +1,84 @@
-# FuelTrip PK - React Native Expo App
+# FuelTrip PK
 
-FuelTrip PK is a React Native Expo mobile app that helps users calculate the estimated fuel cost for a trip in Pakistan. The user can select fuel type, enter their vehicle average, choose starting point and destination, and the app calculates the estimated fuel required and total trip cost.
+A practical React Native mobile application for estimating trip fuel cost in Pakistan using route distance, vehicle efficiency, and configurable fuel prices.
+
+## Engineering Highlights
+
+- Retrieves the user's current location with Expo Location
+- Searches locations and geocodes places using OpenStreetMap-based services
+- Calculates route distance through OSRM
+- Separates route distance, fuel-consumption, and cost calculations
+- Stores vehicle averages and trip history locally
+- Supports one-way and return-trip estimates
+- Allows manual fuel-price updates instead of hard-coding a permanently stale price
+- Shares trip-cost results from the mobile application
+- Uses a responsive React Native interface suitable for Android development and Expo testing
 
 ## Features
 
-* Select Petrol or Diesel
-* Use current location as starting point
-* Search starting and destination locations
-* Get route distance using free OpenStreetMap-based services
-* Calculate fuel required based on vehicle average
-* Calculate total fuel cost using Pakistan fuel prices
-* Manual fuel price update option
-* Return trip cost calculation
-* Save vehicle averages
-* View trip history
-* Share trip cost result
-* Clean and responsive mobile UI
+- Select Petrol or Diesel
+- Use current location as starting point
+- Search starting and destination locations
+- Calculate route distance
+- Estimate fuel required from vehicle average
+- Calculate estimated trip fuel cost
+- Return-trip calculation
+- Save vehicle averages
+- View trip history
+- Share trip-cost results
 
 ## Tech Stack
 
-* React Native
-* Expo
-* JavaScript
-* Expo Location
-* OpenStreetMap
-* OSRM Routing API
-* Nominatim Geocoding
-* React Navigation
-* Expo FileSystem / Local Storage
-* React Native WebView
+- React Native
+- Expo
+- JavaScript
+- Expo Location
+- OpenStreetMap
+- OSRM Routing API
+- Nominatim Geocoding
+- React Navigation
+- Expo FileSystem / local storage
+- React Native WebView
 
-## Project Purpose
+## How It Works
 
-This project was created as a practical React Native portfolio app. It solves a real-world problem for Pakistani users by estimating fuel expenses before travelling. The app focuses on mobile development concepts such as location access, API integration, routing, local storage, form handling, and cost calculation.
+```text
+Fuel Needed = Distance / Vehicle Average
+Total Cost  = Fuel Needed × Fuel Price Per Litre
+```
 
-## Installation
+The application obtains or searches the origin and destination, determines a route distance, applies the vehicle's fuel average, and calculates an estimated fuel expense.
+
+## Run Locally
 
 ```bash
-git clone https://github.com/your-username/fueltrip-pk-react-native.git
-cd fueltrip-pk-react-native
+git clone https://github.com/asadabbas717/pakistan-fuel-trip-calculator.git
+cd pakistan-fuel-trip-calculator
 npm install
 npx expo start
 ```
 
-## Required Dependencies
+Required packages can be installed with:
 
 ```bash
 npx expo install expo-location react-native-webview react-native-screens react-native-safe-area-context expo-file-system
 npm install @react-navigation/native @react-navigation/native-stack
 ```
 
-## How It Works
+## Scope and Limitations
 
-1. User selects fuel type.
-2. User enters vehicle fuel average.
-3. User selects starting point and destination.
-4. App gets route distance.
-5. App calculates fuel required.
-6. App calculates estimated fuel cost.
-7. User can save or share the result.
+Fuel cost is an estimate. Actual consumption can vary with traffic, route conditions, vehicle condition, driving style, and the fuel price in effect at the time of travel.
 
-## Formula Used
-
-```txt
-Fuel Needed = Distance / Vehicle Average
-
-Total Cost = Fuel Needed × Fuel Price Per Litre
-```
-
-## Note
-
-This app uses free OpenStreetMap-based services. Distance and fuel cost are estimates and may vary depending on traffic, road conditions, vehicle condition, driving style, and actual fuel prices.
+The project intentionally allows manual fuel-price updates rather than presenting a bundled price as permanently current.
 
 ## Future Improvements
 
-* User authentication
-* Cloud-based saved trips
-* Admin panel for fuel price updates
-* Multiple route comparison
-* Traffic-based cost estimation
-* Vehicle profile management
-* Dark mode support
+- Vehicle profiles
+- Multiple-route comparison
+- Optional cloud synchronization
+- Traffic-aware estimates
+- Automated fuel-price sourcing from a reliable current data provider
 
 ## Author
 
-Developed by Asad Abbas.
+Developed by **Asad Abbas**.

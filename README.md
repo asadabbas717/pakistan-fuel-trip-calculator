@@ -58,14 +58,9 @@ npm install
 npx expo start
 ```
 
-Required packages can be installed with:
-
-```bash
-npx expo install expo-location react-native-webview react-native-screens react-native-safe-area-context expo-file-system
-npm install @react-navigation/native @react-navigation/native-stack
-```
-
 ## Scope and Limitations
+
+Location permission is needed for current-location use. Routing and place search depend on network access and external OSRM/OpenStreetMap-based services. Fuel prices are manually configurable; the app does not fetch current pump prices.
 
 Fuel cost is an estimate. Actual consumption can vary with traffic, route conditions, vehicle condition, driving style, and the fuel price in effect at the time of travel.
 

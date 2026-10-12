@@ -17,7 +17,7 @@ This is an estimate, not navigation, a payment calculation, or a source of offic
 
 ## Requirements and setup
 
-Use Node 22 LTS (SDK minimum: 20.19) and npm. Android/iOS device testing requires a compatible Expo Go or development build.
+Use Node.js 22.13 or newer and npm. This project targets Expo SDK 57 and React Native 0.86. Use Expo Go for SDK 57 or a matching development build. Minimum platform versions are Android 7 and iOS 16.4. Later Expo Go SDK releases will need a future project upgrade; an SDK upgrade does not guarantee support for every device.
 
 ```sh
 npm ci
@@ -46,7 +46,7 @@ Exports are bundle checks, not signed APK/IPA builds. CI runs these checks and a
 
 ## Architecture and structure
 
-Screens orchestrate user actions. Calculator logic is pure; services isolate provider HTTP requests; collection storage validates records and serializes updates; appStorage implements browser localStorage and SDK 54 legacy filesystem access. Existing storage keys and filenames remain compatible.
+Screens orchestrate user actions. Calculator logic is pure; services isolate provider HTTP requests; collection storage validates records and serializes updates; appStorage implements browser localStorage and SDK 57 legacy filesystem access. Existing storage keys and filenames remain compatible.
 
 - src/screens: calculation, result, fuel prices, vehicles, history
 - src/components: reusable controls, native map, render failure boundary

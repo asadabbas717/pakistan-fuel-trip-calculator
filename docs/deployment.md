@@ -1,6 +1,6 @@
 # Build and release
 
-Use Node 22 LTS and npm ci from the committed lockfile. Set public provider endpoints before exporting. Run npm run check, npx expo install --check, npm run build:web, npm run build:native, and npm audit. dist is generated and ignored.
+Use Node.js 22.13 or newer and npm ci from the committed lockfile. Set public provider endpoints before exporting. Run npm run check, npx expo install --check, npx expo-doctor, npm run build:web, npm run build:native, and npm audit. dist is generated and ignored.
 
 The CI pipeline runs clean installation, lint/format/tests, SDK compatibility validation, web/native exports, and a high-severity dependency audit. The audit is a real gate and currently has unresolved findings; do not describe the pipeline as fully green until these are resolved or formally reviewed.
 
@@ -11,3 +11,5 @@ For a web deployment, choose a static host supporting the exported bundle and re
 Rollback by rebuilding a previously verified commit with its lockfile and endpoint configuration. Existing storage keys/shapes were retained. No schema migration is required for valid existing records. Preserve device data before experimenting with releases: history now has a versioned JSON text export/restore workflow verified in regression tests. Profiles and prices are not included, and native sharing/OS backup behavior still requires device verification.
 
 The app must remain usable without a paid API/service. Manual mode is the guaranteed on-device fallback; online demo endpoints require network access and remain capacity-limited. A public release must either meet their terms or use suitable free infrastructure; a paid provider is not a prerequisite.
+
+After pulling the SDK 57 upgrade, stop the old development server, run npm ci, then npx expo start --clear. Use Expo Go for SDK 57. A new signed development/production binary is needed if using a standalone native build; this audit exports JavaScript/assets only and does not perform store publication. Expo Go does not fully reproduce release splash appearance, which still requires release-device QA.

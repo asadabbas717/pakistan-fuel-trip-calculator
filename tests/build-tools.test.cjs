@@ -3,13 +3,24 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { createRequire } = require("node:module");
-const workerFile =
-  require.resolve("@expo/metro-config/build/transform-worker/postcss");
+const expoRequire = createRequire(require.resolve("expo/metro-config"));
+const metroMain = expoRequire.resolve("@expo/metro-config");
+const workerFile = path.join(
+  path.dirname(metroMain),
+  "transform-worker/postcss.js",
+);
 const { transformPostCssModule } = require(workerFile);
 
-test("patched PostCSS preserves the SDK 54 CSS transformer contract", async () => {
+test("Expo CSS transformer remains compatible with patched PostCSS", async () => {
   const workerRequire = createRequire(workerFile);
-  assert.equal(workerRequire("postcss/package.json").version, "8.5.23");
+  const [major, minor, patch] = workerRequire("postcss/package.json")
+    .version.split(".")
+    .map(Number);
+  assert.equal(major, 8);
+  assert.ok(
+    minor > 5 || (minor === 5 && patch >= 23),
+    "PostCSS must include the reviewed security fixes",
+  );
   const cacheRoot = path.resolve(__dirname, "../.jest-cache");
   fs.mkdirSync(cacheRoot, { recursive: true });
   const projectRoot = fs.mkdtempSync(path.join(cacheRoot, "postcss-"));

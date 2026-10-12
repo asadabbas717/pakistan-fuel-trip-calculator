@@ -6,7 +6,7 @@ Audit date: 12 October 2026. Baseline: commit `23d7590`. Scope: all tracked appl
 
 The baseline had a sensible small screens/services/storage structure and working-looking core flows, but no automated tests or CI. Persistence routinely swallowed failures and returned success, domain validation accepted non-finite numbers, and provider payloads were trusted. Those are more consequential than formatting. The repository was a prototype/student-level implementation with polished portfolio prose.
 
-The improvements retain Expo SDK 54, JavaScript, React Navigation, the screen design, and existing valid user-data formats. They add explicit persistence failures, serialized updates, native recovery copies, domain/provider validation, bounded network requests, location selection regressions, meaningful tests, reproducible quality checks, and accurate documentation. The final assessment is **portfolio quality with substantially stronger engineering controls**. Unresolved dependency advisories, provider policy/capacity concerns, and missing device verification prevent a production-grade rating.
+The original audit retained Expo SDK 54, JavaScript, React Navigation, the screen design, and existing valid user-data formats. A later owner-authorized migration now targets SDK 57; see the migration section below. They add explicit persistence failures, serialized updates, native recovery copies, domain/provider validation, bounded network requests, location selection regressions, meaningful tests, reproducible quality checks, and accurate documentation. The final assessment is **portfolio quality with substantially stronger engineering controls**. Unresolved dependency advisories, provider policy/capacity concerns, and missing device verification prevent a production-grade rating.
 
 ## Original Score
 
@@ -121,9 +121,9 @@ No real secrets were identified in the tracked source/configuration inspected. T
 
 Security improvements include strict numeric/geographic boundaries, fixed storage key validation, HTTPS-only public configuration without embedded credentials, native map navigation restrictions, visible storage/network errors, compatible dependency fixes, and CI dependency scanning. See [security](docs/security.md).
 
-Recorded scan snapshots: [all dependencies](docs/dependency-audit.json), [without dev dependencies](docs/dependency-audit-production.json). The all-dependency scan reported **56 findings (44 high, 12 moderate, 0 critical)** after adding test tooling. The production-dependency scan reported **34 (22 high, 12 moderate, 0 critical)**. Counts include propagated transitive findings; they are not distinct exploitable application flaws. Expo/RN declare build tooling as dependencies, so `--omit=dev` does not establish runtime reachability.
+Recorded scan snapshots: [all dependencies](docs/dependency-audit.json), [without dev dependencies](docs/dependency-audit-production.json). The all-dependency scan reported **58 findings (45 high, 13 moderate, 0 critical)** after adding test tooling and completing the SDK 57 migration. The production-dependency scan reported **36 (23 high, 13 moderate, 0 critical)**. Counts include propagated transitive findings; they are not distinct exploitable application flaws. Expo/RN declare build tooling as dependencies, so `--omit=dev` does not establish runtime reachability.
 
-Root advisories include braces pattern recursion, image-size parser hangs, node-forge signature validation, sprintf-js precision denial of service and uuid buffer bounds. Automatic suggested resolutions include incompatible Expo/RN/Jest version changes, and some roots have no patched version in the scanned range. No blanket major upgrade or speculative override was applied. The CI high-severity audit gate is intentionally unresolved rather than suppressed. Release requires a supported-stack migration/triage with compatibility verification, not simply accepting raw severity counts.
+Current root advisories include braces pattern recursion, node-forge signature validation, sprintf-js precision denial of service and uuid buffer bounds. SDK 57 removes the previously reported image-size root from the recorded scan. Automatic suggested resolutions include incompatible Expo/RN/Jest version changes, and some roots have no patched version in the scanned range. No blanket major upgrade or speculative override was applied. The CI high-severity audit gate is intentionally unresolved rather than suppressed. Release requires a supported-stack migration/triage with compatibility verification, not simply accepting raw severity counts.
 
 ## Data Integrity
 
@@ -135,7 +135,7 @@ Trip geometry and numeric fields are validated, but persisted estimates remain h
 
 - Native device tests for persistence overwrite/recovery, permission dialogs, GPS, map and sharing.
 - Approved geocoding/routing capacity and identification policy for public release; per-client throttling is insufficient for aggregate usage.
-- Supported SDK/toolchain security migration and advisory reachability review; current audit gate remains red.
+- Upstream fixes and advisory reachability review for the remaining toolchain roots; the SDK migration is complete, but the current audit gate remains red.
 - Profile/price backup and corruption-diagnosis tooling, plus optional multi-tab write coordination if web usage expands. History export/restore is now available.
 - Full accessibility QA and improved inline error/loading/empty states across every screen; labels alone are not certification.
 - Error telemetry and complete lifecycle cancellation for GPS/route operations if the product needs stronger operational support.
@@ -175,7 +175,7 @@ Overall is the rounded unweighted category mean. No 10/10 claim is warranted. Th
 
 ## Recommended Next Steps
 
-1. Resolve root SDK/toolchain advisories through a reviewed supported-stack upgrade and repeat exports/device tests.
+1. Review upstream fixes for remaining SDK/toolchain advisories and verify their reachability. The SDK 57 migration is now completed; device verification remains.
 2. Select approved provider infrastructure, identification, CORS and aggregate rate control before public distribution.
 3. Run documented native restart/failure, permission, map/share and accessibility workflows; add device E2E for the main calculation path.
 4. Extend the tested history backup workflow to profiles/prices only with a deliberate cross-collection restore strategy; preserve user data and validate native sharing.
@@ -196,3 +196,19 @@ The owner authorized commit/push and the recommendations, with the requirement t
 Final follow-up verification: npm run check passes, including lint, formatting, 45 application tests in 9 Jest suites, and one SDK CSS-worker compatibility test. Lockfile validation passed with npm ci --dry-run --ignore-scripts --no-audit; the original full clean installation also passed before this one-package override. The non-breaking audit fix found no further compatible changes. After the PostCSS override, the refreshed reports contain 56 total / 34 without dev dependencies; PostCSS is no longer reported. The security gate still fails and remains visible. Web, Android and iOS exports and the online Expo compatibility check passed after the PostCSS override. Native permission/share-sheet, physical-device restart/crash and screen-reader QA remain unverified.
 
 Upstream references: [PostCSS path handling advisory](https://github.com/advisories/GHSA-r28c-9q8g-f849), [unpatched braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), [unpatched node-forge advisory](https://github.com/advisories/GHSA-86w9-cpqp-85rv), and [Nominatim usage limits](https://operations.osmfoundation.org/policies/nominatim/). The rating remains conservatively portfolio quality; added features do not remove the documented release gaps.
+
+## SDK 57 migration — 13 October 2026
+
+The owner requested an upgrade after Expo Go reported SDK 57 while the project targeted SDK 54. The final framework set is Expo 57.0.28, React Native 0.86.3, React/React DOM/test renderer 19.2.3, and Jest Expo 57.0.6 with the separate React Native Jest preset 0.86.3. Expo’s compatibility map aligned the native libraries. Node.js now requires 22.13 or newer; platform minimums are Android 7 and iOS 16.4. SDK compatibility means matching the installed Expo Go SDK, not automatic compatibility with every device or future Expo Go major release.
+
+The migration passed through SDK 55 and 56, with all 45 behavioral tests passing on each aligned runtime set. Initial npm peer-resolution failures were caused by the stale installed graph and the optional React-server test peer selecting a patch above the SDK’s pinned React version. A clean SDK 55 resolution/install succeeded. The optional React-server peer is now pinned to 19.1.9, which satisfies Jest Expo’s declared allowed peer range and React 19.2.3, without declaring an unused server-rendering feature as an app dependency. No legacy-peer-deps or forced install was used. The final dependency tree and lockfile checks pass.
+
+SDK 56’s lazy native fetch implementation needed an explicit HTTP fake in Jest setup to avoid initializing native logging during teardown. Actual HTTP/provider behavior tests retain their failure, timeout, parsing and coordinate assertions. Generated .expo/dist folders are excluded from test discovery. The original installed-package recovery directory was removed after the replacement was verified. The SDK 54 PostCSS override was removed because the current Expo toolchain accepts the patched PostCSS 8 line; its actual CSS-worker contract remains regression-tested using the package’s current layout.
+
+Expo Doctor rejected the removed top-level splash field. It was migrated to the SDK-matched expo-splash-screen config plugin, preserving the existing contain/background settings. Doctor is now included in CI to catch future configuration migrations. Storage continues to use the documented SDK 57 legacy filesystem API, preserving storage keys, filenames and record/backup formats. AGENTS.md and current documentation now refer to SDK 57. No business logic or free-service workflow was removed, and no paid API/service or billing requirement was introduced.
+
+Final checks: npm run check passes (45 tests in 9 suites plus the real Expo CSS-worker test), Expo Doctor passes 21/21 checks, expo install --check passes, npm ls --depth=0 reports a valid dependency set, and npm ci --dry-run validates the final lockfile. Web/Android/iOS exports pass with the final splash configuration, and the public manifest confirms sdkVersion 57.0.0. The original clean SDK 55 npm ci also passed; a full clean SDK 57 install has not been separately repeated locally. Physical-device GPS, share/map behavior, crash recovery and release splash appearance remain unverified.
+
+Refreshed security reports contain 58 all-dependency findings / 36 without dev dependencies, with zero critical findings. Propagated counts are not unique application exploits. Remaining root packages are braces, node-forge, sprintf-js and uuid; the security audit is still nonzero and the CI security gate remains red. Upgrade diagnostics passing is not a claim that dependency security is clean.
+
+References: [SDK 57 requirements](https://docs.expo.dev/versions/v57.0.0/), [incremental upgrade guidance](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/), [SDK 57 legacy filesystem](https://docs.expo.dev/versions/v57.0.0/sdk/filesystem-legacy/), and [splash plugin configuration](https://docs.expo.dev/versions/v57.0.0/sdk/splash-screen/).

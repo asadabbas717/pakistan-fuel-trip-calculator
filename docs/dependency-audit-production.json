@@ -9,6 +9,7 @@
         "@expo/code-signing-certificates",
         "@expo/config",
         "@expo/config-plugins",
+        "@expo/inline-modules",
         "@expo/metro",
         "@expo/metro-config",
         "@expo/prebuild-config",
@@ -16,7 +17,7 @@
       ],
       "effects": ["expo"],
       "range": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44",
-      "nodes": ["node_modules/expo/node_modules/@expo/cli"],
+      "nodes": ["node_modules/@expo/cli"],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -44,10 +45,10 @@
       "via": ["@expo/config-plugins"],
       "effects": [
         "@expo/cli",
+        "@expo/local-build-cache-provider",
         "@expo/metro-config",
         "@expo/prebuild-config",
-        "expo",
-        "expo-constants"
+        "expo"
       ],
       "range": "<=0.0.1-canary-20240418-8d74597 || >=3.3.23-alpha.0",
       "nodes": ["node_modules/@expo/config"],
@@ -62,9 +63,44 @@
       "severity": "moderate",
       "isDirect": false,
       "via": ["xcode"],
-      "effects": ["@expo/cli", "@expo/config", "@expo/prebuild-config", "expo"],
+      "effects": [
+        "@expo/cli",
+        "@expo/config",
+        "@expo/inline-modules",
+        "@expo/prebuild-config",
+        "expo",
+        "expo-splash-screen"
+      ],
       "range": "*",
       "nodes": ["node_modules/@expo/config-plugins"],
+      "fixAvailable": {
+        "name": "expo",
+        "version": "44.0.6",
+        "isSemVerMajor": true
+      }
+    },
+    "@expo/inline-modules": {
+      "name": "@expo/inline-modules",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@expo/config-plugins"],
+      "effects": ["@expo/cli"],
+      "range": ">=0.0.2-canary-20260409-6fc2991",
+      "nodes": ["node_modules/@expo/inline-modules"],
+      "fixAvailable": {
+        "name": "expo",
+        "version": "44.0.6",
+        "isSemVerMajor": true
+      }
+    },
+    "@expo/local-build-cache-provider": {
+      "name": "@expo/local-build-cache-provider",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@expo/config"],
+      "effects": ["expo"],
+      "range": "*",
+      "nodes": ["node_modules/@expo/local-build-cache-provider"],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -128,7 +164,7 @@
       "nodes": ["node_modules/@istanbuljs/load-nyc-config"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -142,7 +178,7 @@
       "nodes": ["node_modules/@jest/environment"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -156,7 +192,7 @@
       "nodes": ["node_modules/@jest/fake-timers"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -170,7 +206,7 @@
       "nodes": ["node_modules/@jest/transform"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -184,7 +220,35 @@
       "nodes": ["node_modules/@react-native/community-cli-plugin"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
+        "isSemVerMajor": true
+      }
+    },
+    "@react-native/jest-preset": {
+      "name": "@react-native/jest-preset",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["babel-jest", "jest-environment-node"],
+      "effects": ["react-native"],
+      "range": "*",
+      "nodes": ["node_modules/@react-native/jest-preset"],
+      "fixAvailable": {
+        "name": "react-native",
+        "version": "0.72.17",
+        "isSemVerMajor": true
+      }
+    },
+    "@react-native/virtualized-lists": {
+      "name": "@react-native/virtualized-lists",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["react-native"],
+      "effects": ["react-native"],
+      "range": ">=0.85.0-nightly-20260108-1236b6be4",
+      "nodes": ["node_modules/@react-native/virtualized-lists"],
+      "fixAvailable": {
+        "name": "react-native",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -195,10 +259,12 @@
       "via": ["sprintf-js"],
       "effects": ["js-yaml"],
       "range": "1.0.0 - 1.0.10",
-      "nodes": ["node_modules/argparse"],
+      "nodes": [
+        "node_modules/@istanbuljs/load-nyc-config/node_modules/argparse"
+      ],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -207,12 +273,12 @@
       "severity": "high",
       "isDirect": false,
       "via": ["@jest/transform", "babel-plugin-istanbul"],
-      "effects": ["react-native"],
+      "effects": ["@react-native/jest-preset"],
       "range": ">=24.2.0-alpha.0",
       "nodes": ["node_modules/babel-jest"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -226,7 +292,7 @@
       "nodes": ["node_modules/babel-plugin-istanbul"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -254,8 +320,8 @@
       "range": "*",
       "nodes": ["node_modules/braces"],
       "fixAvailable": {
-        "name": "expo",
-        "version": "44.0.6",
+        "name": "react-native",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -267,13 +333,12 @@
         "@expo/cli",
         "@expo/config",
         "@expo/config-plugins",
+        "@expo/local-build-cache-provider",
         "@expo/metro",
-        "@expo/metro-config",
-        "expo-asset",
-        "expo-constants"
+        "@expo/metro-config"
       ],
       "effects": [],
-      "range": ">=41.0.0-alpha.0",
+      "range": ">=45.0.0-beta.1",
       "nodes": ["node_modules/expo"],
       "fixAvailable": {
         "name": "expo",
@@ -281,84 +346,31 @@
         "isSemVerMajor": true
       }
     },
-    "expo-asset": {
-      "name": "expo-asset",
+    "expo-splash-screen": {
+      "name": "expo-splash-screen",
       "severity": "moderate",
-      "isDirect": false,
-      "via": ["expo-constants"],
-      "effects": ["expo"],
-      "range": "<=0.0.1-canary-20240418-8d74597 || 8.6.1 - 55.0.0-canary-20260223-05214f1 || 55.0.3-canary-20260128-67ce8d5 || 55.0.8-canary-20260424-7bedc9d - 55.0.8-canary-20260429-a5e59cf || 55.0.11-canary-20260327-0789fbc - 55.0.11-canary-20260402-9da566b || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
-      "nodes": ["node_modules/expo-asset"],
-      "fixAvailable": {
-        "name": "expo",
-        "version": "44.0.6",
-        "isSemVerMajor": true
-      }
-    },
-    "expo-constants": {
-      "name": "expo-constants",
-      "severity": "moderate",
-      "isDirect": false,
-      "via": ["@expo/config"],
-      "effects": ["expo", "expo-asset"],
-      "range": "<=0.0.1-canary-20240418-8d74597 || 10.1.2 - 55.0.14 || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
-      "nodes": ["node_modules/expo-constants"],
-      "fixAvailable": {
-        "name": "expo",
-        "version": "44.0.6",
-        "isSemVerMajor": true
-      }
-    },
-    "image-size": {
-      "name": "image-size",
-      "severity": "high",
-      "isDirect": false,
-      "via": [
-        {
-          "source": 1239765,
-          "name": "image-size",
-          "dependency": "image-size",
-          "title": "image-size: JXL and HEIF parsers allow denial of service through infinite loops",
-          "url": "https://github.com/advisories/GHSA-5p2g-fcmc-qvqq",
-          "severity": "high",
-          "cwe": ["CWE-835"],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
-          },
-          "range": ">=1.2.0 <=2.0.2"
-        },
-        {
-          "source": 1239766,
-          "name": "image-size",
-          "dependency": "image-size",
-          "title": "image-size: ICNS parser allows denial of service through an infinite loop",
-          "url": "https://github.com/advisories/GHSA-w3rx-r6r6-pgpr",
-          "severity": "high",
-          "cwe": ["CWE-835"],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
-          },
-          "range": ">=0.6.3 <=2.0.2"
-        }
-      ],
+      "isDirect": true,
+      "via": ["@expo/config-plugins"],
       "effects": [],
-      "range": "0.6.3 - 2.0.2",
-      "nodes": ["node_modules/image-size"],
-      "fixAvailable": true
+      "range": "55.0.10-canary-20260424-7bedc9d - 55.0.10-canary-20260429-a5e59cf || >=56.0.0-canary-20260212-4f61309",
+      "nodes": ["node_modules/expo-splash-screen"],
+      "fixAvailable": {
+        "name": "expo-splash-screen",
+        "version": "55.0.25",
+        "isSemVerMajor": true
+      }
     },
     "jest-environment-node": {
       "name": "jest-environment-node",
       "severity": "high",
       "isDirect": false,
       "via": ["@jest/environment", "@jest/fake-timers"],
-      "effects": ["react-native"],
+      "effects": ["@react-native/jest-preset"],
       "range": "24.2.0-alpha.0 - 30.2.0",
       "nodes": ["node_modules/jest-environment-node"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -372,7 +384,7 @@
       "nodes": ["node_modules/jest-haste-map"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -386,7 +398,7 @@
       "nodes": ["node_modules/jest-message-util"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -397,10 +409,12 @@
       "via": ["argparse"],
       "effects": ["@istanbuljs/load-nyc-config"],
       "range": "3.2.7 - 3.15.2",
-      "nodes": ["node_modules/js-yaml"],
+      "nodes": [
+        "node_modules/@istanbuljs/load-nyc-config/node_modules/js-yaml"
+      ],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -416,7 +430,10 @@
         "metro-transform-worker"
       ],
       "range": ">=0.71.0",
-      "nodes": ["node_modules/metro"],
+      "nodes": [
+        "node_modules/@expo/metro/node_modules/metro",
+        "node_modules/metro"
+      ],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -430,7 +447,10 @@
       "via": ["metro"],
       "effects": ["@expo/metro", "@react-native/community-cli-plugin", "metro"],
       "range": ">=0.71.0",
-      "nodes": ["node_modules/metro-config"],
+      "nodes": [
+        "node_modules/@expo/metro/node_modules/metro-config",
+        "node_modules/metro-config"
+      ],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -444,7 +464,10 @@
       "via": ["micromatch"],
       "effects": ["@expo/metro", "metro"],
       "range": "*",
-      "nodes": ["node_modules/metro-file-map"],
+      "nodes": [
+        "node_modules/@expo/metro/node_modules/metro-file-map",
+        "node_modules/metro-file-map"
+      ],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -458,7 +481,10 @@
       "via": ["metro"],
       "effects": ["@expo/metro", "metro"],
       "range": ">=0.71.0",
-      "nodes": ["node_modules/metro-transform-worker"],
+      "nodes": [
+        "node_modules/@expo/metro/node_modules/metro-transform-worker",
+        "node_modules/metro-transform-worker"
+      ],
       "fixAvailable": {
         "name": "expo",
         "version": "44.0.6",
@@ -479,8 +505,8 @@
       "range": ">=0.2.0",
       "nodes": ["node_modules/micromatch"],
       "fixAvailable": {
-        "name": "expo",
-        "version": "44.0.6",
+        "name": "react-native",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -519,15 +545,15 @@
       "isDirect": true,
       "via": [
         "@react-native/community-cli-plugin",
-        "babel-jest",
-        "jest-environment-node"
+        "@react-native/jest-preset",
+        "@react-native/virtualized-lists"
       ],
-      "effects": [],
-      "range": "<=0.0.0-ffdfbbec0 || >=0.71.0-rc.0",
+      "effects": ["@react-native/virtualized-lists"],
+      "range": ">=0.73.0-nightly-20230506-1af868c52",
       "nodes": ["node_modules/react-native"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -556,7 +582,7 @@
       "nodes": ["node_modules/sprintf-js"],
       "fixAvailable": {
         "name": "react-native",
-        "version": "0.87.1",
+        "version": "0.72.17",
         "isSemVerMajor": true
       }
     },
@@ -608,18 +634,18 @@
     "vulnerabilities": {
       "info": 0,
       "low": 0,
-      "moderate": 12,
-      "high": 22,
+      "moderate": 13,
+      "high": 23,
       "critical": 0,
-      "total": 34
+      "total": 36
     },
     "dependencies": {
-      "prod": 753,
-      "dev": 443,
-      "optional": 13,
+      "prod": 616,
+      "dev": 308,
+      "optional": 12,
       "peer": 0,
       "peerOptional": 0,
-      "total": 1207
+      "total": 935
     }
   }
 }

@@ -12,4 +12,6 @@ No emulator/device E2E automation, signed-build verification, performance benchm
 
 Follow-up tests cover the actual manual Home-screen workflow (no routing/GPS calls), one-way/return manual estimates, invalid distances, source-specific history validation, mixed online/manual backup round trips, invalid/duplicate/oversized backup rejection, restore write failures and restore/save ordering. A history backup is text for user-managed storage; native share-sheet behavior still needs device testing.
 
-The npm run check gate also runs a separate Node compatibility test against the actual Expo SDK 54 PostCSS worker. It validates the narrow security override with a temporary local CSS project, not a mock of the transformer.
+The npm run check gate also runs a separate Node compatibility test against the installed Expo SDK PostCSS worker. It validates the narrow security override with a temporary local CSS project, not a mock of the transformer.
+
+SDK 57 upgrade validation includes Expo Doctor (21 checks) and Expo’s online package compatibility check. Jest uses the separate @react-native/jest-preset required by React Native 0.86. tests/setup.js supplies an explicit fetch fake for tests; no live provider request or physical native fetch bridge is claimed. Generated .expo/dist directories are excluded from module discovery.

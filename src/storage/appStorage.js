@@ -2,12 +2,82 @@ import { Platform } from "react-native";
 import { createSerialQueue } from "./serialQueue";
 import * as FileSystem from "expo-file-system/legacy";
 
-const queues = new Map();
+const enqueue = createSerialQueue();
+let recovered = false;
+const JOURNAL = "FUEL_TRIP_PK_RESTORE";
+const restoreKeys = [
+  "FUEL_TRIP_PK_HISTORY",
+  "FUEL_TRIP_PK_VEHICLES",
+  "FUEL_TRIP_PK_PRICES",
+  "FUEL_TRIP_PK_APPEARANCE",
+  "FUEL_TRIP_PK_PREFERENCES",
+];
 function serialized(key, operation) {
   if (!/^FUEL_TRIP_PK_[A-Z_]+$/.test(key))
     return Promise.reject(new Error("Invalid storage key."));
-  if (!queues.has(key)) queues.set(key, createSerialQueue());
-  return queues.get(key)(operation);
+  return enqueue(async () => {
+    await recoverRestore();
+    return operation();
+  });
+}
+async function recoverRestore() {
+  if (recovered) return;
+  const journal = await read(JOURNAL);
+  if (journal) {
+    const previous = JSON.parse(journal);
+    if (
+      !previous ||
+      typeof previous !== "object" ||
+      Array.isArray(previous) ||
+      Object.entries(previous).some(
+        ([key, value]) =>
+          !restoreKeys.includes(key) ||
+          (value !== null && typeof value !== "string"),
+      )
+    )
+      throw new Error(
+        "Recovery data is invalid. Saved data has been preserved.",
+      );
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === null) await remove(key);
+      else await write(key, value);
+    }
+    await remove(JOURNAL);
+  }
+  recovered = true;
+}
+export function replaceStoredItems(entries) {
+  if (
+    !entries ||
+    Object.entries(entries).some(
+      ([key, value]) => !restoreKeys.includes(key) || typeof value !== "string",
+    )
+  )
+    return Promise.reject(new Error("Invalid restore values."));
+  return enqueue(async () => {
+    await recoverRestore();
+    const previous = {};
+    for (const key of Object.keys(entries))
+      previous[key] = (await read(key)) ?? null;
+    await write(JOURNAL, JSON.stringify(previous));
+    try {
+      for (const [key, value] of Object.entries(entries))
+        await write(key, value);
+      await remove(JOURNAL);
+    } catch (error) {
+      recovered = false;
+      try {
+        await recoverRestore();
+      } catch {
+        throw new Error(
+          "Restore failed. Recovery will be retried when the app restarts; keep your backup file.",
+        );
+      }
+      throw new Error(
+        "Restore failed; previous data was recovered. " + error.message,
+      );
+    }
+  });
 }
 function filePath(key) {
   if (!/^FUEL_TRIP_PK_[A-Z_]+$/.test(key))

@@ -212,3 +212,13 @@ Final checks: npm run check passes (45 tests in 9 suites plus the real Expo CSS-
 Refreshed security reports contain 58 all-dependency findings / 36 without dev dependencies, with zero critical findings. Propagated counts are not unique application exploits. Remaining root packages are braces, node-forge, sprintf-js and uuid; the security audit is still nonzero and the CI security gate remains red. Upgrade diagnostics passing is not a claim that dependency security is clean.
 
 References: [SDK 57 requirements](https://docs.expo.dev/versions/v57.0.0/), [incremental upgrade guidance](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/), [SDK 57 legacy filesystem](https://docs.expo.dev/versions/v57.0.0/sdk/filesystem-legacy/), and [splash plugin configuration](https://docs.expo.dev/versions/v57.0.0/sdk/splash-screen/).
+
+## Daily-use improvements — 13 October 2026
+
+Added dated PSO price automation through a free public-repository workflow, validated offline caching with protected manual overrides, readable GPS addresses with bounded reverse lookup, local PNG/PDF/text exports, versioned full-app backup files with preview/merge/replace and recovery journals, default vehicle/fuel preferences, recent destinations, route swapping, repeat trips, searchable history and individual deletion. No paid runtime service or credentials are required. The workflow deliberately skips private repositories.
+
+Verification: 67 Jest tests and three Node checks pass; Expo Doctor passes 21 checks; web, Android and iOS bundles export successfully. Browser verification covers the share-card preview, manual trip flow and actual file-picker validation preview. Browser download save/print completion and native receiving-app access still need ordinary-browser/physical-device verification.
+
+Latest dependency audit: full graph 60 findings (46 high, 14 moderate, zero critical); production graph 38 (24 high, 14 moderate, zero critical). The new packages propagate existing Expo/React Native toolchain advisories; advisory roots remain braces, node-forge, sprintf-js and uuid. Suggested forced fixes include incompatible framework versions and were not applied. CI's high-severity gate remains an acknowledged release blocker.
+
+Next product priorities are favourite places, optional toll/parking and cost splitting, estimated-versus-actual fuel tracking, broader Urdu localization and large-text/accessibility/device coverage. These are not represented as completed features.

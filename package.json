@@ -14,14 +14,18 @@
     "build:web": "expo export --platform web",
     "build:native": "expo export --platform android --platform ios",
     "check": "npm run lint && npm run format:check && npm test && npm run test:build-tools",
-    "test:build-tools": "node --test tests/build-tools.test.cjs"
+    "test:build-tools": "node --test tests/build-tools.test.cjs tests/fuel-price-parser.test.cjs",
+    "update:fuel-prices": "node scripts/update-fuel-prices.cjs"
   },
   "dependencies": {
     "@react-navigation/native": "^7.3.0",
     "@react-navigation/native-stack": "^7.17.1",
     "expo": "~57.0.0",
+    "expo-document-picker": "~57.0.3",
     "expo-file-system": "~57.0.7",
     "expo-location": "~57.0.21",
+    "expo-print": "~57.0.2",
+    "expo-sharing": "~57.0.23",
     "expo-splash-screen": "~57.0.10",
     "expo-system-ui": "~57.0.4",
     "react": "19.2.3",
@@ -29,6 +33,7 @@
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
+    "react-native-view-shot": "5.1.0",
     "react-native-web": "~0.21.0",
     "react-native-webview": "13.16.1"
   },

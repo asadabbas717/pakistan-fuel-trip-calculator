@@ -1,3 +1,7 @@
+jest.mock("../src/storage/preferencesStorage", () => ({
+  getPreferences: jest.fn(async () => ({})),
+  savePreferences: jest.fn(async () => ({})),
+}));
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 48, left: 0, right: 0 }),
 }));
@@ -36,6 +40,7 @@ jest.mock("../src/storage/vehicleStorage", () => ({
 }));
 jest.mock("../src/storage/tripStorage", () => ({
   saveTrip: jest.fn(async (trip) => trip),
+  getTripHistory: jest.fn(async () => []),
 }));
 jest.mock("../src/components/LocationInput", () => "LocationInput");
 import React from "react";

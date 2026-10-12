@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -20,19 +20,31 @@ import FuelTypeSelector from "../components/FuelTypeSelector";
 import LocationInput from "../components/LocationInput";
 import PrimaryButton from "../components/PrimaryButton";
 
-import { getFuelPrices } from "../services/fuelPriceService";
+import { getFuelPrices, refreshFuelPrices } from "../services/fuelPriceService";
+import { resolveCurrentLocation } from "../services/currentLocationService";
 import { getRoute } from "../services/routingService";
 import { createManualTrip } from "../services/manualTripService";
 import { calculateFuelCost } from "../services/calculatorService";
-import { saveTrip } from "../storage/tripStorage";
+import { getPreferences, savePreferences } from "../storage/preferencesStorage";
+import { saveTrip, getTripHistory } from "../storage/tripStorage";
 import { getVehicles } from "../storage/vehicleStorage";
 
 function sanitizeAverage(value) {
   return String(value).replace(/,/g, "").trim();
 }
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
   const { colors, styles } = useThemedStyles(createStyles);
+  const gpsGeneration = useRef(0);
+  useEffect(
+    () => () => {
+      gpsGeneration.current += 1;
+    },
+    [],
+  );
+  const initialized = useRef(false);
+  const [recentPlaces, setRecentPlaces] = useState([]);
+  const [locationRevision, setLocationRevision] = useState(0);
   const calculatingRef = useRef(false);
   const [fuelType, setFuelType] = useState("petrol");
   const [fuelPrices, setFuelPrices] = useState({});
@@ -55,15 +67,44 @@ export default function HomeScreen({ navigation }) {
     useCallback(() => {
       let active = true;
       async function load() {
-        const [prices, savedVehicles] = await Promise.allSettled([
-          getFuelPrices(),
-          getVehicles(),
-        ]);
+        const [prices, savedVehicles, preferences, recent] =
+          await Promise.allSettled([
+            getFuelPrices(),
+            getVehicles(),
+            getPreferences(),
+            getTripHistory(),
+          ]);
         if (!active) return;
         setFuelPrices(prices.status === "fulfilled" ? prices.value : {});
         setVehicles(
           savedVehicles.status === "fulfilled" ? savedVehicles.value : [],
         );
+        if (recent.status === "fulfilled") {
+          const places = new Map();
+          for (const trip of recent.value)
+            if (trip.route.source !== "manual")
+              places.set(trip.destination.name, trip.destination);
+          setRecentPlaces([...places.values()].slice(0, 4));
+        }
+        if (!initialized.current && preferences.status === "fulfilled") {
+          initialized.current = true;
+          if (!route?.params?.repeatTrip) {
+            if (preferences.value.fuelType)
+              setFuelType(preferences.value.fuelType);
+            const vehicle =
+              savedVehicles.status === "fulfilled" &&
+              savedVehicles.value.find(
+                (v) => v.id === preferences.value.vehicleId,
+              );
+            if (vehicle) setAverage(String(vehicle.averageKmPerLiter));
+          }
+        }
+        if (prices.status === "fulfilled" && prices.value.mode === "auto")
+          refreshFuelPrices()
+            .then((updated) => {
+              if (active) setFuelPrices(updated);
+            })
+            .catch(() => {});
         if (prices.status === "rejected" || savedVehicles.status === "rejected")
           alert(
             "Some saved settings could not be loaded. Existing data has been preserved.",
@@ -76,12 +117,52 @@ export default function HomeScreen({ navigation }) {
     }, []),
   );
 
+  useEffect(() => {
+    const trip = route?.params?.repeatTrip;
+    if (!trip) return;
+    const manual = trip.route.source === "manual";
+    setManualMode(manual);
+    setAverage(String(trip.averageKmPerLiter));
+    setFuelType(trip.fuelType);
+    setIsReturnTrip(trip.isReturnTrip);
+    if (manual) {
+      setManualDistance(String(trip.route.distanceKm));
+      setStartName(trip.start.name);
+      setDestinationName(trip.destination.name);
+    } else {
+      setStart(trip.start);
+      setDestination(trip.destination);
+    }
+  }, [route?.params?.repeatToken, route?.params?.repeatTrip]);
+  function selectFuel(type) {
+    setFuelType(type);
+    savePreferences({ fuelType: type }).catch(() =>
+      alert("Fuel choice applied; saving your preference failed."),
+    );
+  }
+  function selectStart(place) {
+    gpsGeneration.current += 1;
+    setLoadingLocation(false);
+    setStart(place);
+  }
+  function swapPlaces() {
+    if (manualMode) {
+      setStartName(destinationName);
+      setDestinationName(startName);
+    } else {
+      setLocationRevision((previous) => previous + 1);
+      selectStart(destination);
+      setDestination(start);
+    }
+  }
   async function useCurrentLocation() {
+    const request = ++gpsGeneration.current;
     try {
       setLoadingLocation(true);
 
       const { status } = await Location.requestForegroundPermissionsAsync();
 
+      if (request !== gpsGeneration.current) return;
       if (status !== "granted") {
         alert("Location permission is required.");
         return;
@@ -91,23 +172,22 @@ export default function HomeScreen({ navigation }) {
         accuracy: Location.Accuracy.Balanced,
       });
 
-      const currentLocation = {
-        id: "current-location",
-        name: "Current Location",
-        lat: location.coords.latitude,
-        lon: location.coords.longitude,
-      };
+      const currentLocation = await resolveCurrentLocation(location);
 
-      setStart(currentLocation);
+      if (request === gpsGeneration.current) setStart(currentLocation);
     } catch (error) {
-      alert("Unable to get current location.");
+      if (request === gpsGeneration.current)
+        alert("Unable to get current location.");
     } finally {
-      setLoadingLocation(false);
+      if (request === gpsGeneration.current) setLoadingLocation(false);
     }
   }
 
   function applyVehicleAverage(vehicle) {
     setAverage(String(vehicle.averageKmPerLiter));
+    savePreferences({ vehicleId: vehicle.id }).catch(() =>
+      alert("Vehicle selected; saving your preference failed."),
+    );
   }
 
   function handleAverageChange(value) {
@@ -182,6 +262,10 @@ export default function HomeScreen({ navigation }) {
         };
       }
 
+      tripPayload.priceLabel =
+        fuelPrices.mode === "manual"
+          ? "Manual pump-price override"
+          : fuelPrices.lastUpdated;
       try {
         await saveTrip(tripPayload);
       } catch (error) {
@@ -232,7 +316,7 @@ export default function HomeScreen({ navigation }) {
 
       <Reveal delay={100} style={styles.card}>
         <Text style={styles.step}>01 / BUILD YOUR JOURNEY</Text>
-        <FuelTypeSelector selectedFuel={fuelType} onChange={setFuelType} />
+        <FuelTypeSelector selectedFuel={fuelType} onChange={selectFuel} />
 
         <Text style={styles.priceText}>
           Configured {fuelType === "petrol" ? "Petrol" : "Diesel"} Price: Rs.{" "}
@@ -292,16 +376,17 @@ export default function HomeScreen({ navigation }) {
         ) : (
           <>
             <LocationInput
+              key={"start-" + locationRevision}
               label="Starting Point"
               placeholder="Search starting point e.g. Karachi Saddar"
               value={start}
-              onSelect={setStart}
+              onSelect={selectStart}
             />
 
             <PrimaryButton
               title={
                 start?.id === "current-location"
-                  ? "Current Location Selected"
+                  ? "Refresh GPS location"
                   : "Use Current Location"
               }
               onPress={useCurrentLocation}
@@ -312,10 +397,14 @@ export default function HomeScreen({ navigation }) {
             {start && (
               <Text style={styles.selectedText} numberOfLines={2}>
                 Start: {start.name}
+                {start.accuracyMeters != null
+                  ? ` · GPS accuracy ±${start.accuracyMeters} m`
+                  : ""}
               </Text>
             )}
 
             <LocationInput
+              key={"destination-" + locationRevision}
               label="Destination"
               placeholder="Search destination e.g. Hyderabad"
               value={destination}
@@ -330,6 +419,30 @@ export default function HomeScreen({ navigation }) {
           </>
         )}
 
+        <PrimaryButton
+          title="Swap starting point and destination"
+          variant="outline"
+          disabled={calculating}
+          onPress={swapPlaces}
+        />
+        {!manualMode && recentPlaces.length > 0 && (
+          <View style={styles.vehicleBox}>
+            <Text style={styles.vehicleTitle}>Recent destinations</Text>
+            {recentPlaces.map((place) => (
+              <TouchableOpacity
+                key={place.name}
+                accessibilityRole="button"
+                accessibilityLabel={"Use recent destination " + place.name}
+                onPress={() => setDestination(place)}
+                style={[styles.vehicleChip, { marginBottom: 8 }]}
+              >
+                <Text numberOfLines={2} style={styles.vehicleChipText}>
+                  {place.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
         <Text style={styles.label}>Vehicle Average km/litre</Text>
 
         <TextInput

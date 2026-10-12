@@ -1,9 +1,9 @@
 import { DEFAULT_VEHICLES } from "../utils/constants";
 import { positiveNumber } from "../utils/validation";
 import { getStoredItem, setStoredItem } from "./appStorage";
-import { createSerialQueue } from "./serialQueue";
+import { enqueueCollection } from "./collectionQueue";
 const KEY = "FUEL_TRIP_PK_VEHICLES";
-const enqueue = createSerialQueue();
+const enqueue = enqueueCollection;
 export async function getVehicles() {
   const saved = await getStoredItem(KEY);
   if (saved === null)

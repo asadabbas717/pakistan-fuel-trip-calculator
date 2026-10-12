@@ -55,7 +55,7 @@ export function searchPlace(query, { signal } = {}) {
         ].filter((part) => typeof part === "string" && part.trim());
         return {
           id: String(p.osm_type) + String(p.osm_id),
-          name: [...new Set(parts)].join(", "),
+          name: [...new Set(parts)].join(", ").slice(0, 200),
           lat:
             item.geometry?.type === "Point"
               ? item.geometry.coordinates?.[1]

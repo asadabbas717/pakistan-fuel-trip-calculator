@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "source": "PSO",
+  "sourceUrl": "https://psopk.com/fuel-prices/pol/archives",
+  "effectiveDate": "2026-10-13",
+  "petrol": 395.37,
+  "diesel": 396.85,
+  "checkedAt": "2026-10-12T21:56:49.666Z"
+}

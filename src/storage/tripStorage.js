@@ -1,8 +1,8 @@
 import { getStoredItem, setStoredItem, removeStoredItem } from "./appStorage";
 import { validLocation, validCoordinates } from "../utils/validation";
-import { createSerialQueue } from "./serialQueue";
+import { enqueueCollection } from "./collectionQueue";
 const KEY = "FUEL_TRIP_PK_HISTORY";
-const enqueue = createSerialQueue();
+const enqueue = enqueueCollection;
 export function validTrip(trip) {
   const manual = trip?.route?.source === "manual";
   const namedPlace = (place) =>
@@ -72,6 +72,29 @@ export function saveTrip(trip) {
 }
 export function clearTripHistory() {
   return enqueue(() => removeStoredItem(KEY));
+}
+export function deleteTrip(id) {
+  return enqueue(async () => {
+    const trips = (await getTripHistory()).filter((trip) => trip.id !== id);
+    await setStoredItem(KEY, JSON.stringify(trips));
+    return trips;
+  });
+}
+export function validateSavedTrips(trips) {
+  if (
+    !Array.isArray(trips) ||
+    trips.length > 25 ||
+    !trips.every(
+      (trip) =>
+        validTrip(trip) &&
+        typeof trip.id === "string" &&
+        trip.id.length > 0 &&
+        Number.isFinite(Date.parse(trip.createdAt)),
+    ) ||
+    new Set(trips.map((trip) => trip.id)).size !== trips.length
+  )
+    throw new Error("Invalid history in backup.");
+  return trips;
 }
 
 const MAX_BACKUP_LENGTH = 2_000_000;

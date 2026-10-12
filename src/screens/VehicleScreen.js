@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
+import { getPreferences, savePreferences } from "../storage/preferencesStorage";
 import { confirmAction } from "../utils/confirmAction";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
@@ -22,6 +23,7 @@ export default function VehicleScreen() {
   const { colors, styles } = useThemedStyles(createStyles);
   const busy = useRef(false);
   const [saving, setSaving] = useState(false);
+  const [defaultId, setDefaultId] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [name, setName] = useState("");
   const [average, setAverage] = useState("");
@@ -36,6 +38,7 @@ export default function VehicleScreen() {
     try {
       const saved = await getVehicles();
       setVehicles(saved);
+      setDefaultId((await getPreferences()).vehicleId || "");
     } catch (error) {
       alert(error.message);
     }
@@ -125,6 +128,25 @@ export default function VehicleScreen() {
         <View key={vehicle.id} style={styles.vehicleCard}>
           <View>
             <Text style={styles.vehicleName}>{vehicle.name}</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={"Set " + vehicle.name + " as default"}
+              style={{ paddingVertical: 12 }}
+              onPress={async () => {
+                try {
+                  await savePreferences({ vehicleId: vehicle.id });
+                  setDefaultId(vehicle.id);
+                } catch (error) {
+                  alert(error.message);
+                }
+              }}
+            >
+              <Text style={styles.vehicleAverage}>
+                {defaultId === vehicle.id
+                  ? "Default vehicle ✓"
+                  : "Make default"}
+              </Text>
+            </TouchableOpacity>
             <Text style={styles.vehicleAverage}>
               {vehicle.averageKmPerLiter} km/litre
             </Text>

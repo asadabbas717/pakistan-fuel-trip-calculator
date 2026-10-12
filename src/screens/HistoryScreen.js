@@ -2,126 +2,135 @@ import React, { useCallback, useRef, useState } from "react";
 import {
   Text,
   TextInput,
-  Share,
-  Platform,
   StyleSheet,
   View,
   TouchableOpacity,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-
 import { confirmAction } from "../utils/confirmAction";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   clearTripHistory,
+  deleteTrip,
   getTripHistory,
-  exportTripHistory,
-  restoreTripHistory,
 } from "../storage/tripStorage";
+import {
+  exportAppBackup,
+  parseBackup,
+  restoreAppBackup,
+} from "../services/backupService";
+import { exportBackupFile, importBackupFile } from "../services/fileTransfer";
 import { formatKm, formatPKR } from "../utils/formatters";
 
 export default function HistoryScreen({ navigation }) {
   const { colors, styles } = useThemedStyles(createStyles);
   const [history, setHistory] = useState([]);
-  const restoringRef = useRef(false);
-  const [backupText, setBackupText] = useState("");
-  const [restoring, setRestoring] = useState(false);
-
+  const [search, setSearch] = useState("");
+  const [pending, setPending] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const [mode, setMode] = useState("merge");
   useFocusEffect(
     useCallback(() => {
-      loadHistory();
+      let active = true;
+      getTripHistory()
+        .then((trips) => {
+          if (active) setHistory(trips);
+        })
+        .catch((error) => {
+          if (active) alert(error.message);
+        });
+      return () => {
+        active = false;
+      };
     }, []),
   );
-
-  async function loadHistory() {
+  async function run(action) {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
     try {
-      const trips = await getTripHistory();
-      setHistory(trips);
+      await action();
     } catch (error) {
       alert(error.message);
-    }
-  }
-
-  async function handleClear() {
-    try {
-      await clearTripHistory();
-      setHistory([]);
-      alert("Trip history cleared.");
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-
-  function openTrip(trip) {
-    navigation.navigate("Result", {
-      trip,
-    });
-  }
-
-  async function exportBackup() {
-    try {
-      const backup = await exportTripHistory();
-      setBackupText(backup);
-      if (Platform.OS === "web") {
-        alert(
-          "Your backup is shown below. Copy and save the complete JSON text privately.",
-        );
-        return;
-      }
-      await Share.share({
-        message: backup,
-        title: "FuelTrip PK history backup",
-      });
-    } catch (error) {
-      alert(error.message || "Unable to export history.");
-    }
-  }
-  async function restoreBackup() {
-    if (restoringRef.current) return;
-    restoringRef.current = true;
-    setRestoring(true);
-    try {
-      setHistory(await restoreTripHistory(backupText));
-      setBackupText("");
-      alert("Trip history restored.");
-    } catch (error) {
-      alert(error.message || "Unable to restore history.");
     } finally {
-      restoringRef.current = false;
-      setRestoring(false);
+      busyRef.current = false;
+      setBusy(false);
     }
   }
-
+  async function chooseBackup() {
+    const file = await importBackupFile();
+    if (file) {
+      const data = parseBackup(file.text);
+      setPending({ ...file, data });
+    }
+  }
+  const filtered = history.filter((trip) =>
+    (trip.start.name + " " + trip.destination.name)
+      .toLowerCase()
+      .includes(search.trim().toLowerCase()),
+  );
+  function confirmRestore() {
+    confirmAction(
+      mode === "merge"
+        ? "Merge trips and vehicles? Existing settings and duplicate records are kept. Only the latest 25 trips are retained."
+        : "Replace the data included in this backup? Export your current backup first if you want to keep it.",
+      () =>
+        run(async () => {
+          setHistory(await restoreAppBackup(pending.text, mode));
+          setPending(null);
+          alert(
+            mode === "replace" && pending.data.version === 2
+              ? "Backup restored. Restart the app to apply restored appearance and default trip preferences."
+              : "Backup restored.",
+          );
+        }),
+      {
+        title: "Restore backup",
+        label: "Restore",
+        destructive: mode === "replace",
+      },
+    );
+  }
   return (
     <Screen style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Trip History</Text>
+      <Text style={styles.heading}>Your journeys</Text>
       <Text style={styles.subheading}>
-        Your last 25 calculated trips are saved on this device.
+        Your latest 25 trips, ready to revisit.
       </Text>
-
-      {history.length === 0 ? (
+      <TextInput
+        accessibilityLabel="Search trip history"
+        placeholder="Search by starting point or destination"
+        placeholderTextColor={colors.muted}
+        value={search}
+        onChangeText={setSearch}
+        style={[styles.backupInput, { minHeight: 48 }]}
+      />
+      {filtered.length === 0 && (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyText}>No trip history found.</Text>
+          <Text style={styles.emptyText}>
+            {history.length
+              ? "No matching journeys."
+              : "Your next journey starts here."}
+          </Text>
         </View>
-      ) : (
-        history.map((trip) => (
+      )}
+      {filtered.map((trip) => (
+        <View key={trip.id} style={styles.card}>
           <TouchableOpacity
-            key={trip.id}
-            style={styles.card}
-            onPress={() => openTrip(trip)}
+            accessibilityRole="button"
+            accessibilityLabel={"View trip to " + trip.destination.name}
+            onPress={() => navigation.navigate("Result", { trip })}
           >
-            <Text style={styles.routeText} numberOfLines={1}>
+            <Text style={styles.routeText} numberOfLines={2}>
               {trip.start.name}
             </Text>
-
             <Text style={styles.arrow}>↓</Text>
-
-            <Text style={styles.routeText} numberOfLines={1}>
+            <Text style={styles.routeText} numberOfLines={2}>
               {trip.destination.name}
             </Text>
-
             <View style={styles.row}>
               <Text style={styles.muted}>
                 {formatKm(trip.result.distanceKm)}
@@ -130,63 +139,123 @@ export default function HistoryScreen({ navigation }) {
                 {formatPKR(trip.result.totalCost)}
               </Text>
             </View>
-
             <Text style={styles.date}>
               {new Date(trip.createdAt).toLocaleString()}
             </Text>
           </TouchableOpacity>
-        ))
-      )}
-
-      {history.length > 0 && (
+          <View style={styles.row}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={{ paddingVertical: 14 }}
+              onPress={() =>
+                navigation.popTo("Home", {
+                  repeatTrip: trip,
+                  repeatToken: Date.now(),
+                })
+              }
+            >
+              <Text style={styles.arrow}>Plan again →</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={"Delete trip to " + trip.destination.name}
+              disabled={busy}
+              style={{ padding: 14 }}
+              onPress={() =>
+                confirmAction("Delete this saved trip?", () =>
+                  run(async () => setHistory(await deleteTrip(trip.id))),
+                )
+              }
+            >
+              <Text style={{ color: colors.danger }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))}
+      {!!history.length && (
         <PrimaryButton
           title="Clear History"
-          disabled={restoring}
-          onPress={() =>
-            confirmAction("Delete all saved trip history?", handleClear)
-          }
           variant="outline"
-        />
-      )}
-      <View style={styles.card}>
-        <Text style={styles.routeText}>History backup</Text>
-        <Text style={styles.muted}>
-          Backups contain your route locations. Save them privately. Restoring
-          replaces history; vehicle profiles and fuel prices stay unchanged.
-        </Text>
-        <PrimaryButton
-          title="Export History Backup"
-          onPress={exportBackup}
-          variant="outline"
-          disabled={restoring}
-        />
-        <TextInput
-          placeholderTextColor={colors.muted}
-          accessibilityLabel="History backup JSON"
-          multiline
-          style={styles.backupInput}
-          value={backupText}
-          onChangeText={setBackupText}
-          editable={!restoring}
-          maxLength={2_000_000}
-          placeholder="Paste your FuelTrip PK history backup JSON"
-        />
-        <PrimaryButton
-          title="Restore History Backup"
-          loading={restoring}
-          disabled={!backupText.trim()}
+          disabled={busy}
           onPress={() =>
-            confirmAction(
-              "Replace saved trip history with this backup? Export your current history first if you want to keep it.",
-              restoreBackup,
+            confirmAction("Delete all saved trip history?", () =>
+              run(async () => {
+                await clearTripHistory();
+                setHistory([]);
+              }),
             )
           }
         />
+      )}
+      <View style={styles.card}>
+        <Text style={styles.routeText}>Keep your journeys safe</Text>
+        <Text style={styles.subheading}>
+          One private file for trips, vehicles, prices and preferences. No cloud
+          account required. Backups contain your locations.
+        </Text>
+        <PrimaryButton
+          title="Export backup file"
+          variant="outline"
+          disabled={busy}
+          onPress={() =>
+            run(async () => exportBackupFile(await exportAppBackup()))
+          }
+        />
+        <PrimaryButton
+          title="Choose backup file"
+          disabled={busy}
+          onPress={() => run(chooseBackup)}
+        />
+        {pending && (
+          <>
+            <Text style={styles.routeText}>{pending.name}</Text>
+            <Text style={styles.subheading}>
+              {pending.data.trips.length} trips
+              {pending.data.version === 2
+                ? ", " +
+                  pending.data.vehicles.length +
+                  " vehicles, prices and preferences"
+                : " · legacy history backup"}
+              . Validated and ready to restore.
+            </Text>
+            <View style={styles.row}>
+              {["merge", "replace"].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: mode === option }}
+                  disabled={busy}
+                  onPress={() => setMode(option)}
+                  style={{
+                    padding: 14,
+                    borderRadius: 12,
+                    backgroundColor:
+                      mode === option ? colors.primaryLight : colors.card,
+                  }}
+                >
+                  <Text style={styles.routeText}>
+                    {option === "merge" ? "Merge" : "Replace"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <PrimaryButton
+              title="Restore backup"
+              loading={busy}
+              onPress={confirmRestore}
+            />
+            <PrimaryButton
+              title="Cancel import"
+              variant="outline"
+              disabled={busy}
+              onPress={() => setPending(null)}
+            />
+          </>
+        )}
       </View>
     </Screen>
   );
 }
-
 const createStyles = (colors) =>
   StyleSheet.create({
     backupInput: {

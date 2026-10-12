@@ -1,6 +1,9 @@
-import React from "react";
-import { Text, StyleSheet, Share } from "react-native";
+import React, { useRef, useState } from "react";
+import { Text, StyleSheet, Linking, Platform } from "react-native";
 
+import TripShareCard from "../components/TripShareCard";
+import { exportTripPdf, shareTripText } from "../services/tripExportService";
+import { shareTripImage } from "../services/tripImageService";
 import JourneyHero from "../components/JourneyHero";
 import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
@@ -8,37 +11,43 @@ import { useThemedStyles } from "../theme/ThemeContext";
 import CostSummaryCard from "../components/CostSummaryCard";
 import MapViewWeb from "../components/MapViewWeb";
 import PrimaryButton from "../components/PrimaryButton";
-import { formatKm, formatLiters, formatPKR } from "../utils/formatters";
+import { formatKm } from "../utils/formatters";
 
 export default function ResultScreen({ route, navigation }) {
   const { styles } = useThemedStyles(createStyles);
   const { trip } = route.params;
   const manual = trip.route.source === "manual";
 
-  async function shareResult() {
-    const message = `
-FuelTrip PK Result
-
-From: ${trip.start.name}
-To: ${trip.destination.name}
-
-Distance: ${formatKm(trip.result.distanceKm)}
-Distance source: ${manual ? "Entered manually" : "Online routing estimate"}
-Fuel Type: ${trip.fuelType === "petrol" ? "Petrol" : "Diesel"}
-Fuel Needed: ${formatLiters(trip.result.fuelNeeded)}
-Fuel Price: ${formatPKR(trip.fuelPrice)} / litre
-Estimated Cost: ${formatPKR(trip.result.totalCost)}
-
-Calculated using FuelTrip PK.
-`;
-
+  const capture = useRef(null);
+  const busyRef = useRef(false);
+  const [sharing, setSharing] = useState(false);
+  async function exportResult(action) {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setSharing(true);
     try {
-      await Share.share({ message });
-    } catch {
-      alert("Unable to share this result.");
+      await action();
+    } catch (error) {
+      alert(error.message || "Unable to export this trip.");
+    } finally {
+      busyRef.current = false;
+      setSharing(false);
     }
   }
-
+  async function openDirections() {
+    const destination = manual
+      ? encodeURIComponent(trip.destination.name)
+      : trip.destination.lat + "," + trip.destination.lon;
+    try {
+      await Linking.openURL(
+        "https://www.google.com/maps/dir/?api=1&destination=" +
+          destination +
+          "&travelmode=driving",
+      );
+    } catch {
+      alert("Unable to open your navigation app.");
+    }
+  }
   return (
     <Screen style={styles.container} contentContainerStyle={styles.content}>
       <JourneyHero
@@ -94,11 +103,37 @@ Calculated using FuelTrip PK.
         </Text>
       </Reveal>
 
-      <PrimaryButton title="Share Result" onPress={shareResult} />
+      <PrimaryButton
+        title="Open directions"
+        variant="outline"
+        onPress={openDirections}
+      />
+      <Text style={styles.infoTitle}>A keepsake for your journey</Text>
+      <Text style={styles.subheading}>
+        Preview your share card. Exports are generated on your device.
+      </Text>
+      <TripShareCard trip={trip} captureRef={capture} />
+      <PrimaryButton
+        title={Platform.OS === "web" ? "Download image" : "Share image"}
+        disabled={sharing}
+        onPress={() => exportResult(() => shareTripImage(trip, capture))}
+      />
+      <PrimaryButton
+        title={Platform.OS === "web" ? "Print / Save PDF" : "Share PDF"}
+        variant="outline"
+        disabled={sharing}
+        onPress={() => exportResult(() => exportTripPdf(trip))}
+      />
+      <PrimaryButton
+        title="Share text"
+        variant="outline"
+        disabled={sharing}
+        onPress={() => exportResult(() => shareTripText(trip))}
+      />
 
       <PrimaryButton
         title="Calculate Another Trip"
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => navigation.popTo("Home")}
         variant="outline"
       />
     </Screen>

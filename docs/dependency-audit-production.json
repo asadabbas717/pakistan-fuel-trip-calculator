@@ -69,6 +69,7 @@
         "@expo/inline-modules",
         "@expo/prebuild-config",
         "expo",
+        "expo-sharing",
         "expo-splash-screen"
       ],
       "range": "*",
@@ -346,6 +347,20 @@
         "isSemVerMajor": true
       }
     },
+    "expo-sharing": {
+      "name": "expo-sharing",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": ["@expo/config-plugins"],
+      "effects": [],
+      "range": ">=14.0.9-canary-20251205-756eb7a",
+      "nodes": ["node_modules/expo-sharing"],
+      "fixAvailable": {
+        "name": "expo-sharing",
+        "version": "14.0.8",
+        "isSemVerMajor": true
+      }
+    },
     "expo-splash-screen": {
       "name": "expo-splash-screen",
       "severity": "moderate",
@@ -548,12 +563,26 @@
         "@react-native/jest-preset",
         "@react-native/virtualized-lists"
       ],
-      "effects": ["@react-native/virtualized-lists"],
+      "effects": ["@react-native/virtualized-lists", "react-native-view-shot"],
       "range": ">=0.73.0-nightly-20230506-1af868c52",
       "nodes": ["node_modules/react-native"],
       "fixAvailable": {
         "name": "react-native",
         "version": "0.72.17",
+        "isSemVerMajor": true
+      }
+    },
+    "react-native-view-shot": {
+      "name": "react-native-view-shot",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["react-native"],
+      "effects": [],
+      "range": ">=5.0.0-alpha.0",
+      "nodes": ["node_modules/react-native-view-shot"],
+      "fixAvailable": {
+        "name": "react-native-view-shot",
+        "version": "4.0.3",
         "isSemVerMajor": true
       }
     },
@@ -634,18 +663,18 @@
     "vulnerabilities": {
       "info": 0,
       "low": 0,
-      "moderate": 13,
-      "high": 23,
+      "moderate": 14,
+      "high": 24,
       "critical": 0,
-      "total": 36
+      "total": 38
     },
     "dependencies": {
-      "prod": 616,
+      "prod": 626,
       "dev": 308,
       "optional": 12,
       "peer": 0,
       "peerOptional": 0,
-      "total": 935
+      "total": 945
     }
   }
 }

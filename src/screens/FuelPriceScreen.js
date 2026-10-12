@@ -14,6 +14,7 @@ import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   getFuelPrices,
+  refreshFuelPrices,
   saveFuelPrices,
   resetFuelPrices,
   clearFuelPrices,
@@ -33,6 +34,7 @@ export default function FuelPriceScreen() {
   const busy = useRef(false);
   const [petrol, setPetrol] = useState("");
   const [diesel, setDiesel] = useState("");
+  const [priceMode, setPriceMode] = useState("auto");
   const [lastUpdated, setLastUpdated] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,7 @@ export default function FuelPriceScreen() {
 
       const prices = await getFuelPrices();
 
+      setPriceMode(prices.mode);
       setPetrol(String(prices.petrol));
       setDiesel(String(prices.diesel));
       setLastUpdated(prices.lastUpdated || "Available locally");
@@ -93,6 +96,7 @@ export default function FuelPriceScreen() {
       setPetrol(String(savedPrices.petrol));
       setDiesel(String(savedPrices.diesel));
       setLastUpdated(savedPrices.lastUpdated);
+      setPriceMode("manual");
 
       alert("Fuel prices updated successfully.");
     } catch (error) {
@@ -103,6 +107,23 @@ export default function FuelPriceScreen() {
     }
   }
 
+  async function useOfficialPrices() {
+    if (busy.current) return;
+    busy.current = true;
+    setSaving(true);
+    try {
+      const prices = await refreshFuelPrices({ force: true, enable: true });
+      setPetrol(String(prices.petrol));
+      setDiesel(String(prices.diesel));
+      setPriceMode(prices.mode);
+      setLastUpdated(prices.lastUpdated);
+    } catch (error) {
+      alert(error.message + " Your saved prices were kept.");
+    } finally {
+      busy.current = false;
+      setSaving(false);
+    }
+  }
   async function handleReset() {
     if (busy.current) return;
     busy.current = true;
@@ -113,6 +134,7 @@ export default function FuelPriceScreen() {
       setPetrol(String(defaultPrices.petrol));
       setDiesel(String(defaultPrices.diesel));
       setLastUpdated(defaultPrices.lastUpdated);
+      setPriceMode("manual");
 
       alert("Fuel prices reset successfully.");
     } catch (error) {
@@ -134,7 +156,9 @@ export default function FuelPriceScreen() {
       setDiesel(String(prices.diesel));
       setLastUpdated(prices.lastUpdated);
 
-      alert("Fuel price storage refreshed successfully.");
+      alert(
+        "Manual override removed. Automatic prices will be checked when you return to the calculator.",
+      );
     } catch (error) {
       alert("Unable to refresh fuel price storage.");
     } finally {
@@ -156,8 +180,8 @@ export default function FuelPriceScreen() {
         <Text style={styles.heading}>Pakistan Fuel Prices</Text>
 
         <Text style={styles.subheading}>
-          Update the latest petrol and diesel prices manually from PSO or OGRA.
-          These prices are saved locally on your device.
+          Use verified PSO publications or enter your actual pump prices. These
+          prices are saved locally on your device.
         </Text>
 
         <View style={styles.card}>
@@ -195,6 +219,17 @@ export default function FuelPriceScreen() {
                 placeholder="Example: 388.54"
               />
 
+              <Text style={styles.noteText}>
+                {priceMode === "manual"
+                  ? "Manual override · automatic updates paused"
+                  : "Automatic PSO benchmark · your pump price may differ"}
+              </Text>
+              <PrimaryButton
+                title="Use latest PSO prices"
+                variant="outline"
+                disabled={saving}
+                onPress={useOfficialPrices}
+              />
               <Text style={styles.updatedText}>
                 Last Updated: {lastUpdated || "Not available"}
               </Text>
@@ -219,10 +254,10 @@ export default function FuelPriceScreen() {
 
               <PrimaryButton
                 disabled={saving}
-                title="Refresh Price Storage"
+                title="Remove manual override"
                 onPress={() =>
                   confirmAction(
-                    "Clear saved fuel prices and reload example values?",
+                    "Remove your saved manual override and return to automatic prices?",
                     handleClearAndReload,
                   )
                 }
@@ -245,8 +280,9 @@ export default function FuelPriceScreen() {
           <Text style={styles.noteTitle}>Important</Text>
 
           <Text style={styles.noteText}>
-            Prices are entered manually. This app does not retrieve current fuel
-            prices or verify their accuracy.
+            Automatic prices come from dated PSO publications. Updates retain
+            the last verified values when unavailable. Save a manual override if
+            your pump charges a different price.
           </Text>
         </View>
       </Screen>

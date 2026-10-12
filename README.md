@@ -5,12 +5,12 @@ React Native / Expo application for estimating fuel cost for trips in Pakistan. 
 ## Features and scope
 
 - Manual one-way distance entry works offline, without GPS or any API/service.
-- Optional explicit place search in Pakistan, current foreground location, and free OSRM driving routes.
+- Automatic place suggestions, readable foreground GPS addresses and free OSRM driving routes.
 - Shortest of the alternatives returned by OSRM (not a guarantee of the globally shortest route).
-- Manually configured petrol/diesel prices; bundled values are **examples, not current prices**.
-- Vehicle profiles and the latest 25 trip results stored on the device.
-- Export history as private JSON text and restore a validated backup, with replacement confirmation.
-- Native map preview with OpenStreetMap attribution and native result sharing.
+- Automatic dated PSO benchmark prices with offline cache and manual pump-price overrides. Bundled fallback values remain **examples, not current prices**.
+- Default vehicle and remembered fuel choice, recent destinations, route swapping, repeat trips and searchable history with individual deletion. Latest 25 trips are retained.
+- Export a private JSON backup file containing trips, vehicles, prices and preferences; preview and merge or replace a validated backup. Legacy history files are accepted.
+- Native map preview, directions handoff, share-card images, PDFs and text exports.
 - Browser calculation and storage; browser map preview is intentionally unavailable.
 
 This is an estimate, not navigation, a payment calculation, or a source of official fuel prices. Return trips double the outbound distance; reverse-route differences, tolls, traffic, and vehicle conditions are not modeled.

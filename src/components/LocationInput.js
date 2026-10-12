@@ -18,8 +18,12 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
   const [loading, setLoading] = useState(false);
 
   const generation = useRef(0);
+  const editing = useRef(false);
   useEffect(() => {
-    if (value) setQuery(value.name);
+    if (value) {
+      setQuery(value.name);
+      editing.current = false;
+    } else if (!editing.current) setQuery("");
     generation.current += 1;
     setResults([]);
     setLoading(false);
@@ -29,6 +33,7 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
   }, [value]);
 
   function changeQuery(text) {
+    editing.current = true;
     generation.current += 1;
     setQuery(text);
     setResults([]);
@@ -68,6 +73,7 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
   }, [query, value?.name]);
 
   function handleSelect(place) {
+    editing.current = false;
     generation.current += 1;
     onSelect(place);
     setQuery(place.name);

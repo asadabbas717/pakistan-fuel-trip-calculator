@@ -1,9 +1,12 @@
 import { Platform, Share } from "react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
 import { formatKm, formatLiters, formatPKR } from "../utils/formatters";
-import { downloadBlob, shareExportFile } from "./fileTransfer";
+import {
+  downloadBlob,
+  shareExportData,
+  cleanupOwnedFile,
+} from "./fileTransfer";
 
 export function escapeHtml(value) {
   return String(value).replace(
@@ -77,14 +80,21 @@ export async function exportTripPdf(trip) {
   }
   if (!(await Sharing.isAvailableAsync()))
     throw new Error("File sharing is unavailable.");
-  const { uri } = await Print.printToFileAsync({ html });
+  const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
   try {
-    await shareExportFile(uri, "pdf", {
-      mimeType: "application/pdf",
-      UTI: "com.adobe.pdf",
-      dialogTitle: "Share trip PDF",
-    });
+    if (!base64)
+      throw new Error("The PDF could not be generated. Please try again.");
+    await shareExportData(
+      base64,
+      "pdf",
+      {
+        mimeType: "application/pdf",
+        UTI: "com.adobe.pdf",
+        dialogTitle: "Share trip PDF",
+      },
+      "base64",
+    );
   } finally {
-    await FileSystem.deleteAsync(uri, { idempotent: true });
+    await cleanupOwnedFile(uri);
   }
 }

@@ -4,6 +4,7 @@ import { Text, StyleSheet, Linking, Platform } from "react-native";
 import TripShareCard from "../components/TripShareCard";
 import { exportTripPdf, shareTripText } from "../services/tripExportService";
 import { shareTripImage } from "../services/tripImageService";
+import { directionsUrl } from "../services/directionsService";
 import JourneyHero from "../components/JourneyHero";
 import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
@@ -35,17 +36,10 @@ export default function ResultScreen({ route, navigation }) {
     }
   }
   async function openDirections() {
-    const destination = manual
-      ? encodeURIComponent(trip.destination.name)
-      : trip.destination.lat + "," + trip.destination.lon;
     try {
-      await Linking.openURL(
-        "https://www.google.com/maps/dir/?api=1&destination=" +
-          destination +
-          "&travelmode=driving",
-      );
-    } catch {
-      alert("Unable to open your navigation app.");
+      await Linking.openURL(directionsUrl(trip));
+    } catch (error) {
+      alert(error.message || "Unable to open your navigation app.");
     }
   }
   return (

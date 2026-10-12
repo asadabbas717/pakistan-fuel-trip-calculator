@@ -1,10 +1,13 @@
 import { Platform } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
 import { tripDetails } from "./tripExportService";
 import { formatPKR } from "../utils/formatters";
-import { downloadBlob, shareExportFile } from "./fileTransfer";
+import {
+  downloadBlob,
+  shareExportFile,
+  cleanupOwnedFile,
+} from "./fileTransfer";
 
 function webImage(trip) {
   const canvas = globalThis.document.createElement("canvas");
@@ -83,6 +86,6 @@ export async function shareTripImage(trip, ref) {
       dialogTitle: "Share your journey",
     });
   } finally {
-    await FileSystem.deleteAsync(uri, { idempotent: true });
+    await cleanupOwnedFile(uri);
   }
 }

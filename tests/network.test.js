@@ -26,6 +26,7 @@ test("route sorts by full distance and converts longitude-first geometry", async
     }),
   });
   const result = await getRoute({ start, destination });
+  expect(fetch.mock.calls[0][0]).toContain("overview=simplified");
   expect(result.bestRoute.distanceKm).toBe(1);
   expect(result.bestRoute.coordinates).toEqual([
     [24, 67],

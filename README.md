@@ -73,3 +73,9 @@ Open History and choose Export History Backup. On mobile, save or share the comp
 Open **Theme** in the header to choose Forest & mint, Ocean & lavender, or Terracotta & sand, with Light, Dark, or Automatic device mode. Preferences stay on your device. Subtle entrance animations respect Reduce Motion. Screens include bottom and landscape side safe-area spacing so system navigation controls do not cover actions.
 
 Type a starting point or destination and choose an automatic suggestion; there are no location search buttons. Calculation remains an explicit action after choosing locations and vehicle settings. Existing custom geocoding configuration must use a Photon-compatible endpoint; replace old Nominatim URLs using `.env.example` and restart Expo. Photon and routing require internet; manual distance remains fully offline and requires no paid service.
+
+## Expo Go file handling and map previews
+
+Native PDF exports request PDF bytes from Expo Print and write them into this project's own cache before sharing. Android backup selection retains the provider content URI and copies it into project-owned import storage before size checks and JSON parsing. Cleanup is restricted to owned paths and cannot replace a successful operation or its original error. The original Drive document is preserved.
+
+Google Maps handoff includes both selected endpoints, including reversed trips. Manual trips require both place names before opening directions. Map previews embed the pinned Leaflet 1.9.4 JavaScript/CSS locally, use simplified OSRM overview geometry, and show loading, timeout and retry feedback. OpenStreetMap tiles still require internet; no tiles are bulk downloaded or stored for offline use. Library source and its BSD license are in src/vendor; regenerate from the official leaflet@1.9.4 npm package using scripts/bundle-map-assets.cjs and then run Prettier.

@@ -18,7 +18,7 @@ export async function getRoute({ start, destination }) {
     destination.lon +
     "," +
     destination.lat +
-    "?overview=full&geometries=geojson&alternatives=true&steps=false";
+    "?overview=simplified&geometries=geojson&alternatives=true&steps=false";
   const data = await fetchJson(url);
   if (
     data.code !== "Ok" ||

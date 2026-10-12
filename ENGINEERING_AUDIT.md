@@ -222,3 +222,9 @@ Verification: 67 Jest tests and three Node checks pass; Expo Doctor passes 21 ch
 Latest dependency audit: full graph 60 findings (46 high, 14 moderate, zero critical); production graph 38 (24 high, 14 moderate, zero critical). The new packages propagate existing Expo/React Native toolchain advisories; advisory roots remain braces, node-forge, sprintf-js and uuid. Suggested forced fixes include incompatible framework versions and were not applied. CI's high-severity gate remains an acknowledged release blocker.
 
 Next product priorities are favourite places, optional toll/parking and cost splitting, estimated-versus-actual fuel tracking, broader Urdu localization and large-text/accessibility/device coverage. These are not represented as completed features.
+
+## Expo Go integration corrections
+
+Owner device reports exposed permission-boundary gaps missed by initial filesystem mocks: Print/DocumentPicker can produce host-cache paths outside the project's legacy filesystem scope. PDFs now use returned base64 bytes written to owned cache; Android imports retain provider content URIs and copy to owned cache before reading. Cleanup failures no longer mask sharing or read outcomes. Google Maps links now include both endpoints so reversed trips preserve their origin. Leaflet is bundled with its license, OSRM preview geometry is simplified, and map loading includes failure/timeout/retry feedback.
+
+Validation adds scope-aware PDF/import failure cases, reversed URL construction and map lifecycle tests. Physical Android Expo Go must still verify real cloud-provider permissions and receiving-app access. No additional paid service or runtime package was introduced.

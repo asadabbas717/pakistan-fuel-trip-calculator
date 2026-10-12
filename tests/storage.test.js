@@ -13,6 +13,8 @@ import {
   getTripHistory,
   saveTrip,
   clearTripHistory,
+  exportTripHistory,
+  restoreTripHistory,
 } from "../src/storage/tripStorage";
 import {
   getFuelPrices,
@@ -107,4 +109,58 @@ test("prices reject negative, junk and infinity and propagate reset failures", a
   expect((await getFuelPrices()).petrol).toBe(300.5);
   setStoredItem.mockRejectedValueOnce(new Error("quota"));
   await expect(resetFuelPrices()).rejects.toThrow("quota");
+});
+
+test("history backup round trip retains routed and manual trips", async () => {
+  const { createManualTrip } = require("../src/services/manualTripService");
+  await saveTrip(trip);
+  await saveTrip(
+    createManualTrip({
+      distanceKm: 50,
+      fuelType: "diesel",
+      fuelPrice: 300,
+      averageKmPerLiter: 10,
+    }),
+  );
+  const before = await getTripHistory();
+  const backup = await exportTripHistory();
+  await clearTripHistory();
+  expect(await restoreTripHistory(backup)).toEqual(before);
+  expect(await getTripHistory()).toEqual(before);
+});
+test("invalid restore preserves the collection without partial writes", async () => {
+  await saveTrip(trip);
+  const saved = await getTripHistory();
+  setStoredItem.mockClear();
+  const payload = {
+    app: "FuelTripPK",
+    version: 1,
+    kind: "trip-history",
+    trips: saved,
+  };
+  for (const bad of [
+    "broken JSON",
+    "x".repeat(2_000_001),
+    JSON.stringify({ ...payload, version: 2 }),
+    JSON.stringify({
+      ...payload,
+      trips: [...saved, { ...saved[0], id: "bad", start: null }],
+    }),
+    JSON.stringify({ ...payload, trips: [...saved, ...saved] }),
+  ])
+    await expect(restoreTripHistory(bad)).rejects.toThrow();
+  expect(setStoredItem).not.toHaveBeenCalled();
+  expect(await getTripHistory()).toEqual(saved);
+});
+test("restore propagates storage failure and serializes with subsequent saves", async () => {
+  const empty = JSON.stringify({
+    app: "FuelTripPK",
+    version: 1,
+    kind: "trip-history",
+    trips: [],
+  });
+  setStoredItem.mockRejectedValueOnce(new Error("disk full"));
+  await expect(restoreTripHistory(empty)).rejects.toThrow("disk full");
+  await Promise.all([restoreTripHistory(empty), saveTrip(trip)]);
+  expect(await getTripHistory()).toHaveLength(1);
 });

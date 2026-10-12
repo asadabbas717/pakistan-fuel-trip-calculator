@@ -88,6 +88,8 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
 
       {results.map((item) => (
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={"Select " + item.name}
           key={item.id}
           style={styles.resultItem}
           onPress={() => handleSelect(item)}

@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "build:web": "expo export --platform web",
     "build:native": "expo export --platform android --platform ios",
-    "check": "npm run lint && npm run format:check && npm test"
+    "check": "npm run lint && npm run format:check && npm test && npm run test:build-tools",
+    "test:build-tools": "node --test tests/build-tools.test.cjs"
   },
   "dependencies": {
     "@react-navigation/native": "^7.3.0",
@@ -47,5 +48,10 @@
       "**/tests/**/*.test.js"
     ],
     "cacheDirectory": "<rootDir>/.jest-cache"
+  },
+  "overrides": {
+    "@expo/metro-config": {
+      "postcss": "8.5.23"
+    }
   }
 }

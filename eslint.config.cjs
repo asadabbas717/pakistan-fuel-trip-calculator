@@ -49,4 +49,11 @@ module.exports = [
       "react/jsx-uses-react": "error",
     },
   },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { __dirname: "readonly" },
+    },
+  },
 ];

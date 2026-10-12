@@ -94,7 +94,7 @@
       "name": "@expo/metro-config",
       "severity": "high",
       "isDirect": false,
-      "via": ["@expo/config", "@expo/metro", "postcss"],
+      "via": ["@expo/config", "@expo/metro"],
       "effects": ["@expo/cli", "expo"],
       "range": "<=0.0.1-canary-20240418-8d74597 || >=0.1.49-alpha.0",
       "nodes": ["node_modules/@expo/metro-config"],
@@ -513,77 +513,6 @@
         "isSemVerMajor": true
       }
     },
-    "postcss": {
-      "name": "postcss",
-      "severity": "high",
-      "isDirect": false,
-      "via": [
-        {
-          "source": 1117015,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
-          "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
-          "severity": "moderate",
-          "cwe": ["CWE-79"],
-          "cvss": {
-            "score": 6.1,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
-          },
-          "range": "<8.5.10"
-        },
-        {
-          "source": 1124252,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
-          "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
-          "severity": "high",
-          "cwe": ["CWE-22", "CWE-200"],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
-          },
-          "range": "<=8.5.11"
-        },
-        {
-          "source": 1130709,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
-          "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
-          "severity": "moderate",
-          "cwe": ["CWE-22", "CWE-200"],
-          "cvss": {
-            "score": 0,
-            "vectorString": null
-          },
-          "range": "<=8.5.22"
-        },
-        {
-          "source": 1139510,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
-          "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
-          "severity": "high",
-          "cwe": ["CWE-22"],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
-          },
-          "range": "<=8.5.17"
-        }
-      ],
-      "effects": ["@expo/metro-config"],
-      "range": "<=8.5.22",
-      "nodes": ["node_modules/postcss"],
-      "fixAvailable": {
-        "name": "expo",
-        "version": "44.0.6",
-        "isSemVerMajor": true
-      }
-    },
     "react-native": {
       "name": "react-native",
       "severity": "high",
@@ -680,9 +609,9 @@
       "info": 0,
       "low": 0,
       "moderate": 12,
-      "high": 23,
+      "high": 22,
       "critical": 0,
-      "total": 35
+      "total": 34
     },
     "dependencies": {
       "prod": 753,

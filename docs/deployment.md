@@ -8,4 +8,6 @@ Exports contain JavaScript and assets, not signed binaries. EAS credentials, sto
 
 For a web deployment, choose a static host supporting the exported bundle and review HTTPS, CORS, CSP and provider identification. The browser map remains unavailable. No hosting or release has been performed by this audit.
 
-Rollback by rebuilding a previously verified commit with its lockfile and endpoint configuration. Existing storage keys/shapes were retained. No schema migration is required for valid existing records. Preserve device data before experimenting with releases: there is no user-facing export/import or verified backup/restore workflow yet.
+Rollback by rebuilding a previously verified commit with its lockfile and endpoint configuration. Existing storage keys/shapes were retained. No schema migration is required for valid existing records. Preserve device data before experimenting with releases: history now has a versioned JSON text export/restore workflow verified in regression tests. Profiles and prices are not included, and native sharing/OS backup behavior still requires device verification.
+
+The app must remain usable without a paid API/service. Manual mode is the guaranteed on-device fallback; online demo endpoints require network access and remain capacity-limited. A public release must either meet their terms or use suitable free infrastructure; a paid provider is not a prerequisite.

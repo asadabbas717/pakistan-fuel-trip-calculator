@@ -9,6 +9,7 @@ import { formatKm, formatLiters, formatPKR } from "../utils/formatters";
 
 export default function ResultScreen({ route, navigation }) {
   const { trip } = route.params;
+  const manual = trip.route.source === "manual";
 
   async function shareResult() {
     const message = `
@@ -18,6 +19,7 @@ From: ${trip.start.name}
 To: ${trip.destination.name}
 
 Distance: ${formatKm(trip.result.distanceKm)}
+Distance source: ${manual ? "Entered manually" : "Online routing estimate"}
 Fuel Type: ${trip.fuelType === "petrol" ? "Petrol" : "Diesel"}
 Fuel Needed: ${formatLiters(trip.result.fuelNeeded)}
 Fuel Price: ${formatPKR(trip.fuelPrice)} / litre
@@ -35,17 +37,22 @@ Calculated using FuelTrip PK.
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Best Estimated Route</Text>
+      <Text style={styles.heading}>
+        {manual ? "Manual Distance Estimate" : "Best Estimated Route"}
+      </Text>
       <Text style={styles.subheading}>
-        This route is selected based on the shortest available route from free
-        routing data.
+        {manual
+          ? "Calculated from the distance you entered. No route, map or travel time was retrieved."
+          : "This route is selected based on the shortest available alternative from free routing data."}
       </Text>
 
-      <MapViewWeb
-        start={trip.start}
-        destination={trip.destination}
-        routeCoordinates={trip.route.coordinates}
-      />
+      {!manual && (
+        <MapViewWeb
+          start={trip.start}
+          destination={trip.destination}
+          routeCoordinates={trip.route.coordinates}
+        />
+      )}
 
       <View style={styles.locationCard}>
         <Text style={styles.locationLabel}>From</Text>
@@ -65,12 +72,14 @@ Calculated using FuelTrip PK.
         <Text style={styles.infoTitle}>Route Info</Text>
 
         <Text style={styles.infoText}>
-          Original route distance: {formatKm(trip.route.distanceKm)}
+          One-way distance: {formatKm(trip.route.distanceKm)}
         </Text>
 
-        <Text style={styles.infoText}>
-          Estimated travel time: {trip.route.durationMinutes} minutes
-        </Text>
+        {!manual && (
+          <Text style={styles.infoText}>
+            Estimated travel time: {trip.route.durationMinutes} minutes
+          </Text>
+        )}
 
         <Text style={styles.infoText}>
           Vehicle average: {trip.averageKmPerLiter} km/litre

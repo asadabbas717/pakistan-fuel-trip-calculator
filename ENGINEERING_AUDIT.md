@@ -106,10 +106,10 @@ No device/emulator E2E, signed-build tests, live-provider contract suite, benchm
 ### Executed checks
 
 - `npm ci --ignore-scripts --no-audit`: passed from the final lockfile (1196 packages). A temporary lockfile mismatch during tool installation was corrected before this successful clean install.
-- `npm run check`: passed; ESLint and Prettier passed, with **33 tests across 7 suites**. This includes a short-route regression where legitimate rounded-zero fuel estimates remain saveable.
+- `npm run check`: passed; ESLint and Prettier passed, with **45 tests across 9 suites**, plus the real SDK CSS-worker check after the follow-up. This includes a short-route regression where legitimate rounded-zero fuel estimates remain saveable.
 - `npx expo install --check`: passed against online SDK metadata. An earlier sandbox run used offline metadata and was not treated as equivalent online verification.
 - `npm run build:web`: passed for the final source (539 modules).
-- `npm run build:native`: passed for the final source, with Android (861 modules) and iOS (863 modules) Hermes exports. An initial sandbox attempt failed because Hermes could not write its temporary bytecode file; rerunning with filesystem access succeeded.
+- `npm run build:native`: passed for the final source, with Android and iOS Hermes exports. An initial sandbox attempt failed because Hermes could not write its temporary bytecode file; rerunning with filesystem access succeeded.
 - `git diff --check` and source cleanup search: passed; no TODO/FIXME/HACK/XXX/debug console.log markers remained in application/tests. Tool-generated editing scripts were removed.
 - `npm audit --json` and `npm audit --omit=dev --json`: executed and returned nonzero because unresolved vulnerabilities remain. They are **not passing security checks**. Snapshots and counts are below.
 
@@ -121,9 +121,9 @@ No real secrets were identified in the tracked source/configuration inspected. T
 
 Security improvements include strict numeric/geographic boundaries, fixed storage key validation, HTTPS-only public configuration without embedded credentials, native map navigation restrictions, visible storage/network errors, compatible dependency fixes, and CI dependency scanning. See [security](docs/security.md).
 
-Recorded scan snapshots: [all dependencies](docs/dependency-audit.json), [without dev dependencies](docs/dependency-audit-production.json). The all-dependency scan reported **57 findings (45 high, 12 moderate, 0 critical)** after adding test tooling. The production-dependency scan reported **35 (23 high, 12 moderate, 0 critical)**. Counts include propagated transitive findings; they are not distinct exploitable application flaws. Expo/RN declare build tooling as dependencies, so `--omit=dev` does not establish runtime reachability.
+Recorded scan snapshots: [all dependencies](docs/dependency-audit.json), [without dev dependencies](docs/dependency-audit-production.json). The all-dependency scan reported **56 findings (44 high, 12 moderate, 0 critical)** after adding test tooling. The production-dependency scan reported **34 (22 high, 12 moderate, 0 critical)**. Counts include propagated transitive findings; they are not distinct exploitable application flaws. Expo/RN declare build tooling as dependencies, so `--omit=dev` does not establish runtime reachability.
 
-Root advisories include braces pattern recursion, image-size parser hangs, node-forge signature validation, PostCSS processing/source-map handling, sprintf-js precision denial of service and uuid buffer bounds. Automatic suggested resolutions include incompatible Expo/RN/Jest version changes, and some roots have no patched version in the scanned range. No blanket major upgrade or speculative override was applied. The CI high-severity audit gate is intentionally unresolved rather than suppressed. Release requires a supported-stack migration/triage with compatibility verification, not simply accepting raw severity counts.
+Root advisories include braces pattern recursion, image-size parser hangs, node-forge signature validation, sprintf-js precision denial of service and uuid buffer bounds. Automatic suggested resolutions include incompatible Expo/RN/Jest version changes, and some roots have no patched version in the scanned range. No blanket major upgrade or speculative override was applied. The CI high-severity audit gate is intentionally unresolved rather than suppressed. Release requires a supported-stack migration/triage with compatibility verification, not simply accepting raw severity counts.
 
 ## Data Integrity
 
@@ -136,7 +136,7 @@ Trip geometry and numeric fields are validated, but persisted estimates remain h
 - Native device tests for persistence overwrite/recovery, permission dialogs, GPS, map and sharing.
 - Approved geocoding/routing capacity and identification policy for public release; per-client throttling is insufficient for aggregate usage.
 - Supported SDK/toolchain security migration and advisory reachability review; current audit gate remains red.
-- User-facing data export/repair/restore and optional multi-tab write coordination if web usage expands.
+- Profile/price backup and corruption-diagnosis tooling, plus optional multi-tab write coordination if web usage expands. History export/restore is now available.
 - Full accessibility QA and improved inline error/loading/empty states across every screen; labels alone are not certification.
 - Error telemetry and complete lifecycle cancellation for GPS/route operations if the product needs stronger operational support.
 - Native map asset bundling/integrity controls and browser map implementation if those become requirements.
@@ -178,8 +178,21 @@ Overall is the rounded unweighted category mean. No 10/10 claim is warranted. Th
 1. Resolve root SDK/toolchain advisories through a reviewed supported-stack upgrade and repeat exports/device tests.
 2. Select approved provider infrastructure, identification, CORS and aggregate rate control before public distribution.
 3. Run documented native restart/failure, permission, map/share and accessibility workflows; add device E2E for the main calculation path.
-4. Add export/repair/restore only when recovery requirements are defined; preserve existing user data throughout.
+4. Extend the tested history backup workflow to profiles/prices only with a deliberate cross-collection restore strategy; preserve user data and validate native sharing.
 
 ## Deliberately Unchanged
 
-The app's language, framework, navigation, small UI/component architecture and non-payment estimate arithmetic were retained. No cloud sync, account system, SQL database, microservices, manufactured abstractions, automated official fuel-price feed, or signed release configuration was invented. No Git history was rewritten, no commits/pushes were made, and no deployment was performed.
+The app's language, framework, navigation, small UI/component architecture and non-payment estimate arithmetic were retained. No cloud sync, account system, SQL database, microservices, manufactured abstractions, automated official fuel-price feed, or signed release configuration was invented. No Git history was rewritten and no deployment was performed. The initial audit changes were committed and pushed as b9b4cbe at the owner’s request; subsequent changes are tracked in the follow-up below.
+
+## Free-service follow-up — 12 October 2026
+
+The owner authorized commit/push and the recommendations, with the requirement that no paid API/service is needed to run the app. The audit baseline was pushed as b9b4cbe. This follow-up adds:
+
+- Manual one-way distance entry, with optional place labels and the existing one-way/return calculator. It makes no routing, geocoding, map or GPS request. The source is explicit, with no invented coordinates or travel-time estimate. Existing online records remain readable without migration. Online features remain optional free public services subject to capacity/policy limits.
+- A versioned history-only JSON text backup via native sharing or browser copy, and confirmed restoration. All records, version/kind, duplicate IDs and bounds (25 trips, 2 million text characters) are checked before one serialized collection write. Malformed backups leave current history untouched. Profiles and prices are not overwritten. Backup text contains location information and must be saved privately.
+- Additional accessible button roles/labels for quick actions, location results and vehicle choices. This improves semantics but is not device accessibility certification.
+- A narrowly scoped override of Expo Metro’s PostCSS dependency from its pinned 8.4 line to **8.5.23**, retaining SDK 54 and the public PostCSS 8 API. The actual SDK CSS worker contract is exercised in a separate Node test; it processes a temporary CSS project and preserves the output. Full web/native exports are also checked. No image-size major override was imposed because Metro consumes its v1 default-export API. No paid dependency, cloud account, billing configuration or API key was added.
+
+Final follow-up verification: npm run check passes, including lint, formatting, 45 application tests in 9 Jest suites, and one SDK CSS-worker compatibility test. Lockfile validation passed with npm ci --dry-run --ignore-scripts --no-audit; the original full clean installation also passed before this one-package override. The non-breaking audit fix found no further compatible changes. After the PostCSS override, the refreshed reports contain 56 total / 34 without dev dependencies; PostCSS is no longer reported. The security gate still fails and remains visible. Web, Android and iOS exports and the online Expo compatibility check passed after the PostCSS override. Native permission/share-sheet, physical-device restart/crash and screen-reader QA remain unverified.
+
+Upstream references: [PostCSS path handling advisory](https://github.com/advisories/GHSA-r28c-9q8g-f849), [unpatched braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), [unpatched node-forge advisory](https://github.com/advisories/GHSA-86w9-cpqp-85rv), and [Nominatim usage limits](https://operations.osmfoundation.org/policies/nominatim/). The rating remains conservatively portfolio quality; added features do not remove the documented release gaps.

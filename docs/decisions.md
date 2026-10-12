@@ -21,3 +21,13 @@ Context: Infinity and malformed geometry could reach cost and map interpolation.
 ## Preserve demo defaults and expose deployment limitations
 
 Context: Public geocoding/routing servers are unsuitable as an unrestricted app infrastructure. Decision: configurable HTTPS endpoints, explicit search caching/throttling, and documented provider policy limits. Alternative: invent a server or claim client throttling solves aggregate limits. Consequence: public release requires an approved provider and device/CORS verification. Web uses a clear map-unavailable message because react-native-webview does not implement a browser map.
+
+## Free operation and recovery follow-up
+
+Context: The owner requires no paid API/service, and public endpoints can fail or rate-limit. Decision: retain optional online routing and add a user-entered distance workflow that performs no provider/GPS request. Manual records explicitly identify their source and contain no invented coordinates or travel time. Trade-off: distance accuracy is the user’s responsibility; this is estimation, not offline navigation.
+
+History backup uses bounded, versioned JSON text through existing sharing/copy controls, not a new cloud service. Only one collection is restored after full validation; a multi-collection restore was avoided because the current storage has no cross-key transaction. Existing profiles/prices are not modified.
+
+## Narrow PostCSS security override
+
+Expo Metro pins PostCSS to 8.4 while patched releases are in 8.5. The same-major override is scoped to @expo/metro-config, with a real SDK CSS-worker contract check and all-platform exports. A blanket framework upgrade or image-size v2 override was rejected because the latter changes the default-export API Metro uses. Unpatched upstream roots remain reported rather than suppressed. No dependency/licensing choice introduces a paid runtime service.

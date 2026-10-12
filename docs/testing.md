@@ -9,3 +9,7 @@ Persistence collection tests fake only the storage boundary; adapter tests exerc
 Manual release workflows: deny/grant foreground location; edit a selected place and select another result; change input during a pending search; save/restart/reopen prices and profiles; calculate both trip modes; reopen/delete history with confirmation; simulate storage/full-disk failure; share/cancel/share failure; exercise native map attribution and links; use TalkBack/VoiceOver, keyboard navigation, large text and narrow screens; verify provider outage and CORS.
 
 No emulator/device E2E automation, signed-build verification, performance benchmark, or accessibility certification is claimed. Export checks compile the web and native bundles but do not execute device UI or filesystem code.
+
+Follow-up tests cover the actual manual Home-screen workflow (no routing/GPS calls), one-way/return manual estimates, invalid distances, source-specific history validation, mixed online/manual backup round trips, invalid/duplicate/oversized backup rejection, restore write failures and restore/save ordering. A history backup is text for user-managed storage; native share-sheet behavior still needs device testing.
+
+The npm run check gate also runs a separate Node compatibility test against the actual Expo SDK 54 PostCSS worker. It validates the narrow security override with a temporary local CSS project, not a mock of the transformer.

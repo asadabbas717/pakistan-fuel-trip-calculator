@@ -1,7 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ScrollView,
   Text,
+  TextInput,
+  Share,
+  Platform,
   StyleSheet,
   View,
   TouchableOpacity,
@@ -11,11 +14,19 @@ import { useFocusEffect } from "@react-navigation/native";
 import { confirmAction } from "../utils/confirmAction";
 import colors from "../theme/colors";
 import PrimaryButton from "../components/PrimaryButton";
-import { clearTripHistory, getTripHistory } from "../storage/tripStorage";
+import {
+  clearTripHistory,
+  getTripHistory,
+  exportTripHistory,
+  restoreTripHistory,
+} from "../storage/tripStorage";
 import { formatKm, formatPKR } from "../utils/formatters";
 
 export default function HistoryScreen({ navigation }) {
   const [history, setHistory] = useState([]);
+  const restoringRef = useRef(false);
+  const [backupText, setBackupText] = useState("");
+  const [restoring, setRestoring] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,6 +57,40 @@ export default function HistoryScreen({ navigation }) {
     navigation.navigate("Result", {
       trip,
     });
+  }
+
+  async function exportBackup() {
+    try {
+      const backup = await exportTripHistory();
+      setBackupText(backup);
+      if (Platform.OS === "web") {
+        alert(
+          "Your backup is shown below. Copy and save the complete JSON text privately.",
+        );
+        return;
+      }
+      await Share.share({
+        message: backup,
+        title: "FuelTrip PK history backup",
+      });
+    } catch (error) {
+      alert(error.message || "Unable to export history.");
+    }
+  }
+  async function restoreBackup() {
+    if (restoringRef.current) return;
+    restoringRef.current = true;
+    setRestoring(true);
+    try {
+      setHistory(await restoreTripHistory(backupText));
+      setBackupText("");
+      alert("Trip history restored.");
+    } catch (error) {
+      alert(error.message || "Unable to restore history.");
+    } finally {
+      restoringRef.current = false;
+      setRestoring(false);
+    }
   }
 
   return (
@@ -95,17 +140,61 @@ export default function HistoryScreen({ navigation }) {
       {history.length > 0 && (
         <PrimaryButton
           title="Clear History"
+          disabled={restoring}
           onPress={() =>
             confirmAction("Delete all saved trip history?", handleClear)
           }
           variant="outline"
         />
       )}
+      <View style={styles.card}>
+        <Text style={styles.routeText}>History backup</Text>
+        <Text style={styles.muted}>
+          Backups contain your route locations. Save them privately. Restoring
+          replaces history; vehicle profiles and fuel prices stay unchanged.
+        </Text>
+        <PrimaryButton
+          title="Export History Backup"
+          onPress={exportBackup}
+          variant="outline"
+          disabled={restoring}
+        />
+        <TextInput
+          accessibilityLabel="History backup JSON"
+          multiline
+          style={styles.backupInput}
+          value={backupText}
+          onChangeText={setBackupText}
+          editable={!restoring}
+          maxLength={2_000_000}
+          placeholder="Paste your FuelTrip PK history backup JSON"
+        />
+        <PrimaryButton
+          title="Restore History Backup"
+          loading={restoring}
+          disabled={!backupText.trim()}
+          onPress={() =>
+            confirmAction(
+              "Replace saved trip history with this backup? Export your current history first if you want to keep it.",
+              restoreBackup,
+            )
+          }
+        />
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  backupInput: {
+    minHeight: 100,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: 12,
+    marginVertical: 10,
+    color: colors.text,
+  },
   container: {
     backgroundColor: colors.background,
   },

@@ -19,6 +19,7 @@ import PrimaryButton from "../components/PrimaryButton";
 
 import { getFuelPrices } from "../services/fuelPriceService";
 import { getRoute } from "../services/routingService";
+import { createManualTrip } from "../services/manualTripService";
 import { calculateFuelCost } from "../services/calculatorService";
 import { saveTrip } from "../storage/tripStorage";
 import { getVehicles } from "../storage/vehicleStorage";
@@ -34,6 +35,10 @@ export default function HomeScreen({ navigation }) {
 
   const [start, setStart] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [manualMode, setManualMode] = useState(false);
+  const [manualDistance, setManualDistance] = useState("");
+  const [startName, setStartName] = useState("");
+  const [destinationName, setDestinationName] = useState("");
 
   const [average, setAverage] = useState("12");
   const [isReturnTrip, setIsReturnTrip] = useState(false);
@@ -109,12 +114,12 @@ export default function HomeScreen({ navigation }) {
     if (calculatingRef.current) return;
     calculatingRef.current = true;
     try {
-      if (!start) {
+      if (!manualMode && !start) {
         alert("Please select starting point.");
         return;
       }
 
-      if (!destination) {
+      if (!manualMode && !destination) {
         alert("Please select destination.");
         return;
       }
@@ -137,28 +142,41 @@ export default function HomeScreen({ navigation }) {
 
       setCalculating(true);
 
-      const routeData = await getRoute({
-        start,
-        destination,
-      });
+      let tripPayload;
+      if (manualMode) {
+        tripPayload = createManualTrip({
+          distanceKm: manualDistance,
+          startName,
+          destinationName,
+          fuelType,
+          fuelPrice: selectedFuelPrice,
+          averageKmPerLiter: averageNumber,
+          isReturnTrip,
+        });
+      } else {
+        const routeData = await getRoute({
+          start,
+          destination,
+        });
 
-      const result = calculateFuelCost({
-        distanceKm: routeData.bestRoute.distanceKm,
-        averageKmPerLiter: averageNumber,
-        fuelPricePerLiter: selectedFuelPrice,
-        isReturnTrip,
-      });
+        const result = calculateFuelCost({
+          distanceKm: routeData.bestRoute.distanceKm,
+          averageKmPerLiter: averageNumber,
+          fuelPricePerLiter: selectedFuelPrice,
+          isReturnTrip,
+        });
 
-      const tripPayload = {
-        start,
-        destination,
-        fuelType,
-        fuelPrice: selectedFuelPrice,
-        averageKmPerLiter: averageNumber,
-        isReturnTrip,
-        result,
-        route: routeData.bestRoute,
-      };
+        tripPayload = {
+          start,
+          destination,
+          fuelType,
+          fuelPrice: selectedFuelPrice,
+          averageKmPerLiter: averageNumber,
+          isReturnTrip,
+          result,
+          route: routeData.bestRoute,
+        };
+      }
 
       try {
         await saveTrip(tripPayload);
@@ -184,12 +202,13 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.heading}>Calculate your trip fuel cost</Text>
 
       <Text style={styles.subheading}>
-        Search your route, choose fuel type, enter car average, and get
-        estimated fuel cost.
+        Search your route or enter a distance, choose fuel type, enter car
+        average, and get estimated fuel cost.
       </Text>
 
       <View style={styles.quickActions}>
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.quickButton}
           onPress={() => navigation.navigate("FuelPrices")}
         >
@@ -197,6 +216,7 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.quickButton}
           onPress={() => navigation.navigate("Vehicles")}
         >
@@ -204,6 +224,7 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.quickButton}
           onPress={() => navigation.navigate("History")}
         >
@@ -221,41 +242,90 @@ export default function HomeScreen({ navigation }) {
           {fuelPrices.lastUpdated}
         </Text>
 
-        <LocationInput
-          label="Starting Point"
-          placeholder="Search starting point e.g. Karachi Saddar"
-          value={start}
-          onSelect={setStart}
-        />
+        <View style={styles.switchRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>Enter distance manually</Text>
+            <Text style={styles.hint}>
+              Works offline, without an API or location permission
+            </Text>
+          </View>
+          <Switch
+            accessibilityLabel="Enter distance manually"
+            disabled={calculating}
+            value={manualMode}
+            onValueChange={setManualMode}
+          />
+        </View>
 
-        <PrimaryButton
-          title={
-            start?.id === "current-location"
-              ? "Current Location Selected"
-              : "Use Current Location"
-          }
-          onPress={useCurrentLocation}
-          loading={loadingLocation}
-          variant="outline"
-        />
+        {manualMode ? (
+          <>
+            <Text style={styles.label}>One-way distance (km)</Text>
+            <TextInput
+              accessibilityLabel="One-way distance in kilometres"
+              style={styles.input}
+              keyboardType="decimal-pad"
+              value={manualDistance}
+              onChangeText={setManualDistance}
+              placeholder="Example: 150"
+            />
+            <Text style={styles.label}>From (optional)</Text>
+            <TextInput
+              accessibilityLabel="Manual starting point"
+              style={styles.input}
+              value={startName}
+              onChangeText={setStartName}
+              maxLength={200}
+              placeholder="Example: Karachi"
+            />
+            <Text style={styles.label}>To (optional)</Text>
+            <TextInput
+              accessibilityLabel="Manual destination"
+              style={styles.input}
+              value={destinationName}
+              onChangeText={setDestinationName}
+              maxLength={200}
+              placeholder="Example: Hyderabad"
+            />
+          </>
+        ) : (
+          <>
+            <LocationInput
+              label="Starting Point"
+              placeholder="Search starting point e.g. Karachi Saddar"
+              value={start}
+              onSelect={setStart}
+            />
 
-        {start && (
-          <Text style={styles.selectedText} numberOfLines={2}>
-            Start: {start.name}
-          </Text>
-        )}
+            <PrimaryButton
+              title={
+                start?.id === "current-location"
+                  ? "Current Location Selected"
+                  : "Use Current Location"
+              }
+              onPress={useCurrentLocation}
+              loading={loadingLocation}
+              variant="outline"
+            />
 
-        <LocationInput
-          label="Destination"
-          placeholder="Search destination e.g. Hyderabad"
-          value={destination}
-          onSelect={setDestination}
-        />
+            {start && (
+              <Text style={styles.selectedText} numberOfLines={2}>
+                Start: {start.name}
+              </Text>
+            )}
 
-        {destination && (
-          <Text style={styles.selectedText} numberOfLines={2}>
-            Destination: {destination.name}
-          </Text>
+            <LocationInput
+              label="Destination"
+              placeholder="Search destination e.g. Hyderabad"
+              value={destination}
+              onSelect={setDestination}
+            />
+
+            {destination && (
+              <Text style={styles.selectedText} numberOfLines={2}>
+                Destination: {destination.name}
+              </Text>
+            )}
+          </>
         )}
 
         <Text style={styles.label}>Vehicle Average km/litre</Text>
@@ -278,6 +348,14 @@ export default function HomeScreen({ navigation }) {
               {vehicles.map((vehicle) => (
                 <TouchableOpacity
                   key={vehicle.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    "Use " +
+                    vehicle.name +
+                    " average, " +
+                    vehicle.averageKmPerLiter +
+                    " kilometres per litre"
+                  }
                   style={styles.vehicleChip}
                   onPress={() => applyVehicleAverage(vehicle)}
                 >
@@ -313,8 +391,10 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <Text style={styles.note}>
-        Note: This app uses free OpenStreetMap-based services. Distance is
-        estimated and may vary from real-world traffic or road conditions.
+        Online search uses free OpenStreetMap-based services with usage limits.
+        If search or routing is unavailable, enter a distance manually.
+        Estimates exclude tolls and traffic; a return trip doubles the one-way
+        distance. Map and place data © OpenStreetMap contributors.
       </Text>
     </ScrollView>
   );

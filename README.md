@@ -4,10 +4,12 @@ React Native / Expo application for estimating fuel cost for trips in Pakistan. 
 
 ## Features and scope
 
-- Explicit place search in Pakistan, current foreground location, and OSRM driving routes.
+- Manual one-way distance entry works offline, without GPS or any API/service.
+- Optional explicit place search in Pakistan, current foreground location, and free OSRM driving routes.
 - Shortest of the alternatives returned by OSRM (not a guarantee of the globally shortest route).
 - Manually configured petrol/diesel prices; bundled values are **examples, not current prices**.
 - Vehicle profiles and the latest 25 trip results stored on the device.
+- Export history as private JSON text and restore a validated backup, with replacement confirmation.
 - Native map preview with OpenStreetMap attribution and native result sharing.
 - Browser calculation and storage; browser map preview is intentionally unavailable.
 
@@ -24,6 +26,8 @@ npm start
 ```
 
 Optional: copy .env.example to .env and set EXPO_PUBLIC_GEOCODING_URL and EXPO_PUBLIC_ROUTING_URL to approved HTTPS provider endpoints with compatible Nominatim and OSRM response contracts. These values are embedded in the bundle: **never include credentials or secrets**. Restart Expo after changes. No server, database, account, or API secret is required.
+
+**Free-service requirement:** No paid API, subscription, billing account or API key is required. Manual-distance calculations, profiles and history work on-device. Online features use optional free public endpoints; they are not unlimited.
 
 Public endpoints are demonstration defaults with no availability guarantee. Public Nominatim has a strict usage policy, including an aggregate one-request-per-second limit and no autocomplete. The client uses explicit search, caching, and per-instance throttling, which cannot enforce limits across a distributed app. Choose an approved provider or a controlled proxy before a public release. Browser identification and CORS also require provider review.
 
@@ -59,3 +63,7 @@ Stored routes contain precise location information. Storage is unencrypted and n
 [Audit](ENGINEERING_AUDIT.md) · [Architecture](docs/architecture.md) · [Decisions](docs/decisions.md) · [Testing](docs/testing.md) · [Security](docs/security.md) · [Deployment](docs/deployment.md)
 
 Developed by Asad Abbas.
+
+## History backup and restore
+
+Open History and choose Export History Backup. On mobile, save or share the complete JSON text through your device; on web, copy the JSON shown in the backup field into a private text file. To restore, paste the full text and choose Restore History Backup, then confirm replacement. Only history is included: fuel prices and vehicle profiles remain unchanged. Invalid, oversized, unknown-version and duplicate-ID backups are rejected before writing. Keep backups private because they contain route labels and, for online trips, coordinates.

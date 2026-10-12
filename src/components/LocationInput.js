@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,17 +15,39 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const generation = useRef(0);
+  useEffect(() => {
+    if (value) setQuery(value.name);
+    generation.current += 1;
+    setResults([]);
+    setLoading(false);
+    return () => {
+      generation.current += 1;
+    };
+  }, [value]);
+
+  function changeQuery(text) {
+    generation.current += 1;
+    setQuery(text);
+    setResults([]);
+    setLoading(false);
+    onSelect(null);
+  }
+
   async function handleSearch() {
+    const request = ++generation.current;
     try {
       setLoading(true);
       setResults([]);
 
       const places = await searchPlace(query);
+      if (request !== generation.current) return;
       setResults(places);
+      if (!places.length) alert("No locations found. Try a different search.");
     } catch (error) {
-      alert(error.message);
+      if (request === generation.current) alert(error.message);
     } finally {
-      setLoading(false);
+      if (request === generation.current) setLoading(false);
     }
   }
 
@@ -44,11 +66,18 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
           style={styles.input}
           placeholder={placeholder}
           value={query}
-          onChangeText={setQuery}
+          accessibilityLabel={label}
+          onChangeText={changeQuery}
           multiline
         />
 
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={"Search " + label}
+          disabled={loading}
+          style={styles.searchButton}
+          onPress={handleSearch}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (

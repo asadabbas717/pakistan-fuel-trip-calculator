@@ -1,37 +1,52 @@
-const OSRM_BASE_URL = "https://router.project-osrm.org/route/v1/driving";
-
+import { serviceUrl } from "../utils/serviceUrl";
+import { fetchJson } from "./httpClient";
+import { validLocation, validCoordinates } from "../utils/validation";
+const BASE_URL = serviceUrl(
+  process.env.EXPO_PUBLIC_ROUTING_URL,
+  "https://router.project-osrm.org/route/v1/driving",
+);
 export async function getRoute({ start, destination }) {
-  if (!start || !destination) {
-    throw new Error("Start and destination are required.");
-  }
-
-  const coordinates = `${start.lon},${start.lat};${destination.lon},${destination.lat}`;
-
-  const url = `${OSRM_BASE_URL}/${coordinates}?overview=full&geometries=geojson&alternatives=true&steps=false`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch route.");
-  }
-
-  const data = await response.json();
-
-  if (!data.routes || data.routes.length === 0) {
+  if (!validLocation(start) || !validLocation(destination))
+    throw new Error("Valid start and destination coordinates are required.");
+  const url =
+    BASE_URL +
+    "/" +
+    start.lon +
+    "," +
+    start.lat +
+    ";" +
+    destination.lon +
+    "," +
+    destination.lat +
+    "?overview=full&geometries=geojson&alternatives=true&steps=false";
+  const data = await fetchJson(url);
+  if (
+    data.code !== "Ok" ||
+    !Array.isArray(data.routes) ||
+    data.routes.length === 0
+  )
     throw new Error("No route found.");
-  }
-
-  const routes = data.routes.map((route, index) => ({
-    id: `route-${index}`,
-    distanceKm: Number((route.distance / 1000).toFixed(2)),
-    durationMinutes: Number((route.duration / 60).toFixed(0)),
-    coordinates: route.geometry.coordinates.map(([lon, lat]) => [lat, lon]),
-  }));
-
+  const routes = data.routes.map((route, index) => {
+    if (
+      !Number.isFinite(route.distance) ||
+      route.distance <= 0 ||
+      !Number.isFinite(route.duration) ||
+      route.duration < 0 ||
+      !Array.isArray(route.geometry?.coordinates)
+    )
+      throw new Error("Invalid route response.");
+    const coordinates = route.geometry.coordinates.map((point) =>
+      Array.isArray(point) ? [point[1], point[0]] : [],
+    );
+    if (!validCoordinates(coordinates))
+      throw new Error("Invalid route geometry.");
+    return {
+      id: "route-" + index,
+      distanceKm: route.distance / 1000,
+      durationMinutes: Math.round(route.duration / 60),
+      coordinates,
+    };
+  });
   routes.sort((a, b) => a.distanceKm - b.distanceKm);
-
-  return {
-    bestRoute: routes[0],
-    allRoutes: routes,
-  };
+  return { bestRoute: routes[0], allRoutes: routes };
 }

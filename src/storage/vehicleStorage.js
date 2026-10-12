@@ -1,66 +1,63 @@
 import { DEFAULT_VEHICLES } from "../utils/constants";
-import {
-  getStoredItem,
-  setStoredItem,
-} from "./appStorage";
-
-const VEHICLE_KEY = "FUEL_TRIP_PK_VEHICLES";
-
+import { positiveNumber } from "../utils/validation";
+import { getStoredItem, setStoredItem } from "./appStorage";
+import { createSerialQueue } from "./serialQueue";
+const KEY = "FUEL_TRIP_PK_VEHICLES";
+const enqueue = createSerialQueue();
 export async function getVehicles() {
-  try {
-    const saved = await getStoredItem(VEHICLE_KEY);
-
-    if (!saved) {
-      await setStoredItem(VEHICLE_KEY, JSON.stringify(DEFAULT_VEHICLES));
-      return DEFAULT_VEHICLES;
-    }
-
-    const parsedVehicles = JSON.parse(saved);
-
-    if (!Array.isArray(parsedVehicles)) {
-      await setStoredItem(VEHICLE_KEY, JSON.stringify(DEFAULT_VEHICLES));
-      return DEFAULT_VEHICLES;
-    }
-
-    return parsedVehicles;
-  } catch (error) {
-    console.log("Vehicle loading error:", error);
-    return DEFAULT_VEHICLES;
-  }
+  const saved = await getStoredItem(KEY);
+  if (saved === null)
+    return DEFAULT_VEHICLES.map((vehicle) => ({ ...vehicle }));
+  const vehicles = JSON.parse(saved);
+  if (
+    !Array.isArray(vehicles) ||
+    !vehicles.every(
+      (v) =>
+        v &&
+        typeof v.id === "string" &&
+        typeof v.name === "string" &&
+        v.name.trim() &&
+        Number.isFinite(v.averageKmPerLiter) &&
+        v.averageKmPerLiter > 0,
+    )
+  )
+    throw new Error(
+      "Saved vehicles are damaged. Existing data has been preserved.",
+    );
+  return vehicles;
 }
-
-export async function saveVehicle(vehicle) {
+export function saveVehicle(vehicle) {
+  const name = vehicle.name?.trim();
+  if (!name || name.length > 100)
+    return Promise.reject(
+      new Error("Vehicle name must contain 1–100 characters."),
+    );
+  let average;
   try {
-    const vehicles = await getVehicles();
-
-    const newVehicle = {
-      id: Date.now().toString(),
-      name: vehicle.name,
-      averageKmPerLiter: Number(vehicle.averageKmPerLiter),
-    };
-
-    const updatedVehicles = [newVehicle, ...vehicles];
-
-    await setStoredItem(VEHICLE_KEY, JSON.stringify(updatedVehicles));
-
-    return updatedVehicles;
+    average = positiveNumber(vehicle.averageKmPerLiter, "Vehicle average");
   } catch (error) {
-    console.log("Vehicle saving error:", error);
-    return DEFAULT_VEHICLES;
+    return Promise.reject(error);
   }
+  return enqueue(async () => {
+    const vehicles = await getVehicles();
+    const updated = [
+      {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+        name,
+        averageKmPerLiter: average,
+      },
+      ...vehicles,
+    ];
+    await setStoredItem(KEY, JSON.stringify(updated));
+    return updated;
+  });
 }
-
-export async function deleteVehicle(vehicleId) {
-  try {
-    const vehicles = await getVehicles();
-
-    const updatedVehicles = vehicles.filter((item) => item.id !== vehicleId);
-
-    await setStoredItem(VEHICLE_KEY, JSON.stringify(updatedVehicles));
-
-    return updatedVehicles;
-  } catch (error) {
-    console.log("Vehicle delete error:", error);
-    return DEFAULT_VEHICLES;
-  }
+export function deleteVehicle(id) {
+  return enqueue(async () => {
+    const updated = (await getVehicles()).filter(
+      (vehicle) => vehicle.id !== id,
+    );
+    await setStoredItem(KEY, JSON.stringify(updated));
+    return updated;
+  });
 }

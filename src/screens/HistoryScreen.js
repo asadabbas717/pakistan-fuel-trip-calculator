@@ -1,7 +1,14 @@
 import React, { useCallback, useState } from "react";
-import { ScrollView, Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
+import { confirmAction } from "../utils/confirmAction";
 import colors from "../theme/colors";
 import PrimaryButton from "../components/PrimaryButton";
 import { clearTripHistory, getTripHistory } from "../storage/tripStorage";
@@ -13,18 +20,26 @@ export default function HistoryScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       loadHistory();
-    }, [])
+    }, []),
   );
 
   async function loadHistory() {
-    const trips = await getTripHistory();
-    setHistory(trips);
+    try {
+      const trips = await getTripHistory();
+      setHistory(trips);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   async function handleClear() {
-    await clearTripHistory();
-    setHistory([]);
-    alert("Trip history cleared.");
+    try {
+      await clearTripHistory();
+      setHistory([]);
+      alert("Trip history cleared.");
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   function openTrip(trip) {
@@ -62,8 +77,12 @@ export default function HistoryScreen({ navigation }) {
             </Text>
 
             <View style={styles.row}>
-              <Text style={styles.muted}>{formatKm(trip.result.distanceKm)}</Text>
-              <Text style={styles.cost}>{formatPKR(trip.result.totalCost)}</Text>
+              <Text style={styles.muted}>
+                {formatKm(trip.result.distanceKm)}
+              </Text>
+              <Text style={styles.cost}>
+                {formatPKR(trip.result.totalCost)}
+              </Text>
             </View>
 
             <Text style={styles.date}>
@@ -74,7 +93,13 @@ export default function HistoryScreen({ navigation }) {
       )}
 
       {history.length > 0 && (
-        <PrimaryButton title="Clear History" onPress={handleClear} variant="outline" />
+        <PrimaryButton
+          title="Clear History"
+          onPress={() =>
+            confirmAction("Delete all saved trip history?", handleClear)
+          }
+          variant="outline"
+        />
       )}
     </ScrollView>
   );

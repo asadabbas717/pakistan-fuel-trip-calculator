@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
 } from "react-native";
 import * as Location from "expo-location";
+import { useFocusEffect } from "@react-navigation/native";
 
 import colors from "../theme/colors";
 import FuelTypeSelector from "../components/FuelTypeSelector";
@@ -21,17 +22,15 @@ import { getRoute } from "../services/routingService";
 import { calculateFuelCost } from "../services/calculatorService";
 import { saveTrip } from "../storage/tripStorage";
 import { getVehicles } from "../storage/vehicleStorage";
-import { DEFAULT_FUEL_PRICES } from "../utils/constants";
 
 function sanitizeAverage(value) {
-  return String(value)
-    .replace(/,/g, "")
-    .replace(/[^\d.]/g, "");
+  return String(value).replace(/,/g, "").trim();
 }
 
 export default function HomeScreen({ navigation }) {
+  const calculatingRef = useRef(false);
   const [fuelType, setFuelType] = useState("petrol");
-  const [fuelPrices, setFuelPrices] = useState(DEFAULT_FUEL_PRICES);
+  const [fuelPrices, setFuelPrices] = useState({});
 
   const [start, setStart] = useState(null);
   const [destination, setDestination] = useState(null);
@@ -43,27 +42,30 @@ export default function HomeScreen({ navigation }) {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [calculating, setCalculating] = useState(false);
 
-  useEffect(() => {
-    loadInitialData();
-
-    const unsubscribe = navigation.addListener("focus", loadInitialData);
-    return unsubscribe;
-  }, [navigation]);
-
-  async function loadInitialData() {
-    try {
-      const prices = await getFuelPrices();
-      const savedVehicles = await getVehicles();
-
-      setFuelPrices(prices || DEFAULT_FUEL_PRICES);
-      setVehicles(savedVehicles || []);
-    } catch (error) {
-      console.log("Home screen loading error:", error);
-
-      setFuelPrices(DEFAULT_FUEL_PRICES);
-      setVehicles([]);
-    }
-  }
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      async function load() {
+        const [prices, savedVehicles] = await Promise.allSettled([
+          getFuelPrices(),
+          getVehicles(),
+        ]);
+        if (!active) return;
+        setFuelPrices(prices.status === "fulfilled" ? prices.value : {});
+        setVehicles(
+          savedVehicles.status === "fulfilled" ? savedVehicles.value : [],
+        );
+        if (prices.status === "rejected" || savedVehicles.status === "rejected")
+          alert(
+            "Some saved settings could not be loaded. Existing data has been preserved.",
+          );
+      }
+      load();
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
 
   async function useCurrentLocation() {
     try {
@@ -89,7 +91,6 @@ export default function HomeScreen({ navigation }) {
 
       setStart(currentLocation);
     } catch (error) {
-      console.log("Location error:", error);
       alert("Unable to get current location.");
     } finally {
       setLoadingLocation(false);
@@ -105,6 +106,8 @@ export default function HomeScreen({ navigation }) {
   }
 
   async function calculateTrip() {
+    if (calculatingRef.current) return;
+    calculatingRef.current = true;
     try {
       if (!start) {
         alert("Please select starting point.");
@@ -118,16 +121,16 @@ export default function HomeScreen({ navigation }) {
 
       const averageNumber = Number(sanitizeAverage(average));
 
-      if (!averageNumber || averageNumber <= 0) {
+      if (!Number.isFinite(averageNumber) || averageNumber <= 0) {
         alert("Please enter valid vehicle average. Example: 12");
         return;
       }
 
       const selectedFuelPrice = Number(fuelPrices?.[fuelType]);
 
-      if (!selectedFuelPrice || selectedFuelPrice <= 0) {
+      if (!Number.isFinite(selectedFuelPrice) || selectedFuelPrice <= 0) {
         alert(
-          "Fuel price is missing or invalid. Please open Fuel Prices screen and save valid prices."
+          "Fuel price is missing or invalid. Please open Fuel Prices screen and save valid prices.",
         );
         return;
       }
@@ -157,15 +160,21 @@ export default function HomeScreen({ navigation }) {
         route: routeData.bestRoute,
       };
 
-      await saveTrip(tripPayload);
+      try {
+        await saveTrip(tripPayload);
+      } catch (error) {
+        alert(
+          "Estimate calculated, but history was not saved: " + error.message,
+        );
+      }
 
       navigation.navigate("Result", {
         trip: tripPayload,
       });
     } catch (error) {
-      console.log("Calculation error:", error);
       alert(error.message || "Something went wrong.");
     } finally {
+      calculatingRef.current = false;
       setCalculating(false);
     }
   }
@@ -175,7 +184,8 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.heading}>Calculate your trip fuel cost</Text>
 
       <Text style={styles.subheading}>
-        Search your route, choose fuel type, enter car average, and get estimated fuel cost.
+        Search your route, choose fuel type, enter car average, and get
+        estimated fuel cost.
       </Text>
 
       <View style={styles.quickActions}>
@@ -205,8 +215,10 @@ export default function HomeScreen({ navigation }) {
         <FuelTypeSelector selectedFuel={fuelType} onChange={setFuelType} />
 
         <Text style={styles.priceText}>
-          Current {fuelType === "petrol" ? "Petrol" : "Diesel"} Price: Rs.{" "}
+          Configured {fuelType === "petrol" ? "Petrol" : "Diesel"} Price: Rs.{" "}
           {fuelPrices?.[fuelType] || "Not Available"} / litre
+          {"\n"}
+          {fuelPrices.lastUpdated}
         </Text>
 
         <LocationInput
@@ -249,6 +261,7 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.label}>Vehicle Average km/litre</Text>
 
         <TextInput
+          accessibilityLabel="Vehicle average in kilometres per litre"
           style={styles.input}
           keyboardType={Platform.OS === "android" ? "numeric" : "decimal-pad"}
           placeholder="Example: 12"
@@ -284,6 +297,7 @@ export default function HomeScreen({ navigation }) {
           </View>
 
           <Switch
+            accessibilityLabel="Return trip"
             value={isReturnTrip}
             onValueChange={setIsReturnTrip}
             trackColor={{ false: "#D1D5DB", true: "#A5D6A7" }}
@@ -299,8 +313,8 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <Text style={styles.note}>
-        Note: This app uses free OpenStreetMap-based services. Distance is estimated and may
-        vary from real-world traffic or road conditions.
+        Note: This app uses free OpenStreetMap-based services. Distance is
+        estimated and may vary from real-world traffic or road conditions.
       </Text>
     </ScrollView>
   );

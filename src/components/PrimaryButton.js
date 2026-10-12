@@ -1,21 +1,40 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import colors from "../theme/colors";
 
-export default function PrimaryButton({ title, onPress, loading, variant = "primary" }) {
+export default function PrimaryButton({
+  title,
+  onPress,
+  loading,
+  disabled = false,
+  variant = "primary",
+}) {
   const isOutline = variant === "outline";
 
   return (
     <TouchableOpacity
       style={[styles.button, isOutline && styles.outlineButton]}
       onPress={onPress}
-      disabled={loading}
+      disabled={loading || disabled}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{
+        disabled: !!(loading || disabled),
+        busy: !!loading,
+      }}
       activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator color={isOutline ? colors.primary : "#fff"} />
       ) : (
-        <Text style={[styles.text, isOutline && styles.outlineText]}>{title}</Text>
+        <Text style={[styles.text, isOutline && styles.outlineText]}>
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );

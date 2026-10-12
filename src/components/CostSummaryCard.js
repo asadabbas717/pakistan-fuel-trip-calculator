@@ -22,7 +22,9 @@ export default function CostSummaryCard({ result, fuelType, fuelPrice }) {
 
       <View style={styles.row}>
         <Text style={styles.label}>Fuel Type</Text>
-        <Text style={styles.value}>{fuelType === "petrol" ? "Petrol" : "Diesel"}</Text>
+        <Text style={styles.value}>
+          {fuelType === "petrol" ? "Petrol" : "Diesel"}
+        </Text>
       </View>
 
       <View style={styles.row}>

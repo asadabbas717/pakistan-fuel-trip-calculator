@@ -1,346 +1,67 @@
 import { Platform } from "react-native";
-import * as FileSystemLegacy from "expo-file-system";
+import { createSerialQueue } from "./serialQueue";
+import * as FileSystem from "expo-file-system/legacy";
 
-let memoryStorage = {};
-
-let NewFileSystem = null;
-
-try {
-  NewFileSystem = require("expo-file-system");
-} catch (error) {
-  NewFileSystem = null;
+const queues = new Map();
+function serialized(key, operation) {
+  if (!/^FUEL_TRIP_PK_[A-Z_]+$/.test(key))
+    return Promise.reject(new Error("Invalid storage key."));
+  if (!queues.has(key)) queues.set(key, createSerialQueue());
+  return queues.get(key)(operation);
 }
-
-const STORAGE_FOLDER_NAME = "fuel-trip-storage";
-
-function isWeb() {
-  return Platform.OS === "web";
+function filePath(key) {
+  if (!/^FUEL_TRIP_PK_[A-Z_]+$/.test(key))
+    throw new Error("Invalid storage key.");
+  if (!FileSystem.documentDirectory)
+    throw new Error("Device storage is unavailable.");
+  return FileSystem.documentDirectory + "fuel-trip-storage/" + key + ".json";
 }
-
-function getWebStorage() {
-  if (typeof localStorage !== "undefined") {
-    return localStorage;
-  }
-
-  return null;
+function webStorage() {
+  if (typeof localStorage === "undefined")
+    throw new Error("Browser storage is unavailable.");
+  return localStorage;
 }
-
-function getLegacyDocumentDirectory() {
-  if (
-    FileSystemLegacy &&
-    typeof FileSystemLegacy.documentDirectory === "string" &&
-    FileSystemLegacy.documentDirectory.length > 0
-  ) {
-    return FileSystemLegacy.documentDirectory;
-  }
-
-  return null;
+async function read(key) {
+  if (Platform.OS === "web") return webStorage().getItem(key);
+  const path = filePath(key);
+  const info = await FileSystem.getInfoAsync(path);
+  if (info.exists) return FileSystem.readAsStringAsync(path);
+  const backup = await FileSystem.getInfoAsync(path + ".bak");
+  return backup.exists ? FileSystem.readAsStringAsync(path + ".bak") : null;
 }
-
-function getNewFileSystemObjects() {
-  try {
-    const File = NewFileSystem?.File;
-    const Directory = NewFileSystem?.Directory;
-    const Paths = NewFileSystem?.Paths;
-
-    if (!File || !Directory || !Paths || !Paths.document) {
-      return null;
-    }
-
-    return {
-      File,
-      Directory,
-      Paths,
-    };
-  } catch (error) {
-    return null;
-  }
-}
-
-async function getStoredItemUsingNewFileSystem(key) {
-  const fs = getNewFileSystemObjects();
-
-  if (!fs) {
-    return null;
-  }
-
-  try {
-    const { File, Directory, Paths } = fs;
-
-    const storageDirectory = new Directory(Paths.document, STORAGE_FOLDER_NAME);
-
-    if (!storageDirectory.exists) {
-      storageDirectory.create({
-        intermediates: true,
-        idempotent: true,
-      });
-    }
-
-    const storageFile = new File(storageDirectory, `${key}.json`);
-
-    if (!storageFile.exists) {
-      return null;
-    }
-
-    const content = storageFile.text();
-
-    return content;
-  } catch (error) {
-    console.log(`New FileSystem get error for ${key}:`, error);
-    return null;
-  }
-}
-
-async function setStoredItemUsingNewFileSystem(key, value) {
-  const fs = getNewFileSystemObjects();
-
-  if (!fs) {
-    return false;
-  }
-
-  try {
-    const { File, Directory, Paths } = fs;
-
-    const storageDirectory = new Directory(Paths.document, STORAGE_FOLDER_NAME);
-
-    if (!storageDirectory.exists) {
-      storageDirectory.create({
-        intermediates: true,
-        idempotent: true,
-      });
-    }
-
-    const storageFile = new File(storageDirectory, `${key}.json`);
-
-    storageFile.write(String(value));
-
-    return true;
-  } catch (error) {
-    console.log(`New FileSystem set error for ${key}:`, error);
-    return false;
-  }
-}
-
-async function removeStoredItemUsingNewFileSystem(key) {
-  const fs = getNewFileSystemObjects();
-
-  if (!fs) {
-    return false;
-  }
-
-  try {
-    const { File, Directory, Paths } = fs;
-
-    const storageDirectory = new Directory(Paths.document, STORAGE_FOLDER_NAME);
-    const storageFile = new File(storageDirectory, `${key}.json`);
-
-    if (storageFile.exists) {
-      storageFile.delete();
-    }
-
-    return true;
-  } catch (error) {
-    console.log(`New FileSystem remove error for ${key}:`, error);
-    return false;
-  }
-}
-
-async function getStoredItemUsingLegacyFileSystem(key) {
-  try {
-    const documentDirectory = getLegacyDocumentDirectory();
-
-    if (!documentDirectory) {
-      return null;
-    }
-
-    const storageFolder = `${documentDirectory}${STORAGE_FOLDER_NAME}/`;
-    const filePath = `${storageFolder}${key}.json`;
-
-    const folderInfo = await FileSystemLegacy.getInfoAsync(storageFolder);
-
-    if (!folderInfo.exists) {
-      await FileSystemLegacy.makeDirectoryAsync(storageFolder, {
-        intermediates: true,
-      });
-    }
-
-    const fileInfo = await FileSystemLegacy.getInfoAsync(filePath);
-
-    if (!fileInfo.exists) {
-      return null;
-    }
-
-    const value = await FileSystemLegacy.readAsStringAsync(filePath);
-
-    return value;
-  } catch (error) {
-    console.log(`Legacy FileSystem get error for ${key}:`, error);
-    return null;
-  }
-}
-
-async function setStoredItemUsingLegacyFileSystem(key, value) {
-  try {
-    const documentDirectory = getLegacyDocumentDirectory();
-
-    if (!documentDirectory) {
-      return false;
-    }
-
-    const storageFolder = `${documentDirectory}${STORAGE_FOLDER_NAME}/`;
-    const filePath = `${storageFolder}${key}.json`;
-
-    const folderInfo = await FileSystemLegacy.getInfoAsync(storageFolder);
-
-    if (!folderInfo.exists) {
-      await FileSystemLegacy.makeDirectoryAsync(storageFolder, {
-        intermediates: true,
-      });
-    }
-
-    await FileSystemLegacy.writeAsStringAsync(filePath, String(value), {
-      encoding: FileSystemLegacy.EncodingType.UTF8,
-    });
-
-    return true;
-  } catch (error) {
-    console.log(`Legacy FileSystem set error for ${key}:`, error);
-    return false;
-  }
-}
-
-async function removeStoredItemUsingLegacyFileSystem(key) {
-  try {
-    const documentDirectory = getLegacyDocumentDirectory();
-
-    if (!documentDirectory) {
-      return false;
-    }
-
-    const storageFolder = `${documentDirectory}${STORAGE_FOLDER_NAME}/`;
-    const filePath = `${storageFolder}${key}.json`;
-
-    const fileInfo = await FileSystemLegacy.getInfoAsync(filePath);
-
-    if (fileInfo.exists) {
-      await FileSystemLegacy.deleteAsync(filePath);
-    }
-
-    return true;
-  } catch (error) {
-    console.log(`Legacy FileSystem remove error for ${key}:`, error);
-    return false;
-  }
-}
-
-export async function getStoredItem(key) {
-  try {
-    if (isWeb()) {
-      const webStorage = getWebStorage();
-
-      if (webStorage) {
-        return webStorage.getItem(key);
-      }
-
-      return memoryStorage[key] || null;
-    }
-
-    const newFileSystemValue = await getStoredItemUsingNewFileSystem(key);
-
-    if (newFileSystemValue !== null && newFileSystemValue !== undefined) {
-      return newFileSystemValue;
-    }
-
-    const legacyFileSystemValue = await getStoredItemUsingLegacyFileSystem(key);
-
-    if (legacyFileSystemValue !== null && legacyFileSystemValue !== undefined) {
-      return legacyFileSystemValue;
-    }
-
-    return memoryStorage[key] || null;
-  } catch (error) {
-    console.log(`Storage get final fallback for ${key}:`, error);
-    return memoryStorage[key] || null;
-  }
-}
-
-export async function setStoredItem(key, value) {
-  try {
-    const stringValue = String(value);
-
-    if (isWeb()) {
-      const webStorage = getWebStorage();
-
-      if (webStorage) {
-        webStorage.setItem(key, stringValue);
-        return true;
-      }
-
-      memoryStorage[key] = stringValue;
-      return true;
-    }
-
-    const savedWithNewFileSystem = await setStoredItemUsingNewFileSystem(
-      key,
-      stringValue
+async function write(key, value) {
+  if (Platform.OS === "web") webStorage().setItem(key, String(value));
+  else {
+    const path = filePath(key);
+    await FileSystem.makeDirectoryAsync(
+      FileSystem.documentDirectory + "fuel-trip-storage",
+      { intermediates: true },
     );
-
-    if (savedWithNewFileSystem) {
-      memoryStorage[key] = stringValue;
-      return true;
-    }
-
-    const savedWithLegacyFileSystem = await setStoredItemUsingLegacyFileSystem(
-      key,
-      stringValue
-    );
-
-    if (savedWithLegacyFileSystem) {
-      memoryStorage[key] = stringValue;
-      return true;
-    }
-
-    memoryStorage[key] = stringValue;
-
-    console.log(
-      `Storage warning for ${key}: saved in temporary memory only. It will reset when app restarts.`
-    );
-
-    return true;
-  } catch (error) {
-    console.log(`Storage set final fallback for ${key}:`, error);
-
-    memoryStorage[key] = String(value);
-
-    return true;
+    await FileSystem.writeAsStringAsync(path + ".tmp", String(value));
+    // iOS legacy move removes the target first; retain a recovery copy.
+    if ((await FileSystem.getInfoAsync(path)).exists)
+      await FileSystem.copyAsync({ from: path, to: path + ".bak" });
+    await FileSystem.moveAsync({ from: path + ".tmp", to: path });
   }
+  return true;
+}
+async function remove(key) {
+  if (Platform.OS === "web") webStorage().removeItem(key);
+  else {
+    const path = filePath(key);
+    await FileSystem.deleteAsync(path + ".bak", { idempotent: true });
+    await FileSystem.deleteAsync(path + ".tmp", { idempotent: true });
+    await FileSystem.deleteAsync(path, { idempotent: true });
+  }
+  return true;
 }
 
-export async function removeStoredItem(key) {
-  try {
-    if (isWeb()) {
-      const webStorage = getWebStorage();
-
-      if (webStorage) {
-        webStorage.removeItem(key);
-      }
-
-      delete memoryStorage[key];
-
-      return true;
-    }
-
-    await removeStoredItemUsingNewFileSystem(key);
-    await removeStoredItemUsingLegacyFileSystem(key);
-
-    delete memoryStorage[key];
-
-    return true;
-  } catch (error) {
-    console.log(`Storage remove final fallback for ${key}:`, error);
-
-    delete memoryStorage[key];
-
-    return true;
-  }
+export function getStoredItem(key) {
+  return serialized(key, () => read(key));
+}
+export function setStoredItem(key, value) {
+  return serialized(key, () => write(key, value));
+}
+export function removeStoredItem(key) {
+  return serialized(key, () => remove(key));
 }

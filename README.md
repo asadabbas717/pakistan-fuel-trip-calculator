@@ -1,79 +1,61 @@
 # FuelTrip PK
 
-A practical React Native mobile application for estimating trip fuel cost in Pakistan using route distance, vehicle efficiency, and configurable fuel prices.
+React Native / Expo application for estimating fuel cost for trips in Pakistan. Select origin and destination, configure a vehicle's km/litre and a fuel price, and estimate one-way or return travel costs.
 
-## Engineering Highlights
+## Features and scope
 
-- Retrieves the user's current location with Expo Location
-- Searches locations and geocodes places using OpenStreetMap-based services
-- Calculates route distance through OSRM
-- Separates route distance, fuel-consumption, and cost calculations
-- Stores vehicle averages and trip history locally
-- Supports one-way and return-trip estimates
-- Allows manual fuel-price updates instead of hard-coding a permanently stale price
-- Shares trip-cost results from the mobile application
-- Uses a responsive React Native interface suitable for Android development and Expo testing
+- Explicit place search in Pakistan, current foreground location, and OSRM driving routes.
+- Shortest of the alternatives returned by OSRM (not a guarantee of the globally shortest route).
+- Manually configured petrol/diesel prices; bundled values are **examples, not current prices**.
+- Vehicle profiles and the latest 25 trip results stored on the device.
+- Native map preview with OpenStreetMap attribution and native result sharing.
+- Browser calculation and storage; browser map preview is intentionally unavailable.
 
-## Features
+This is an estimate, not navigation, a payment calculation, or a source of official fuel prices. Return trips double the outbound distance; reverse-route differences, tolls, traffic, and vehicle conditions are not modeled.
 
-- Select Petrol or Diesel
-- Use current location as starting point
-- Search starting and destination locations
-- Calculate route distance
-- Estimate fuel required from vehicle average
-- Calculate estimated trip fuel cost
-- Return-trip calculation
-- Save vehicle averages
-- View trip history
-- Share trip-cost results
+## Requirements and setup
 
-## Tech Stack
+Use Node 22 LTS (SDK minimum: 20.19) and npm. Android/iOS device testing requires a compatible Expo Go or development build.
 
-- React Native
-- Expo
-- JavaScript
-- Expo Location
-- OpenStreetMap
-- OSRM Routing API
-- Nominatim Geocoding
-- React Navigation
-- Expo FileSystem / local storage
-- React Native WebView
-
-## How It Works
-
-```text
-Fuel Needed = Distance / Vehicle Average
-Total Cost  = Fuel Needed × Fuel Price Per Litre
+```sh
+npm ci
+npm start
+# or npm run android / npm run ios / npm run web
 ```
 
-The application obtains or searches the origin and destination, determines a route distance, applies the vehicle's fuel average, and calculates an estimated fuel expense.
+Optional: copy .env.example to .env and set EXPO_PUBLIC_GEOCODING_URL and EXPO_PUBLIC_ROUTING_URL to approved HTTPS provider endpoints with compatible Nominatim and OSRM response contracts. These values are embedded in the bundle: **never include credentials or secrets**. Restart Expo after changes. No server, database, account, or API secret is required.
 
-## Run Locally
+Public endpoints are demonstration defaults with no availability guarantee. Public Nominatim has a strict usage policy, including an aggregate one-request-per-second limit and no autocomplete. The client uses explicit search, caching, and per-instance throttling, which cannot enforce limits across a distributed app. Choose an approved provider or a controlled proxy before a public release. Browser identification and CORS also require provider review.
 
-```bash
-git clone https://github.com/asadabbas717/pakistan-fuel-trip-calculator.git
-cd pakistan-fuel-trip-calculator
-npm install
-npx expo start
+## Development and verification
+
+```sh
+npm run check          # lint, formatting, behavioral tests
+npm run format        # apply formatting
+npx expo install --check
+npm run build:web
+npm run build:native  # Android and iOS JavaScript/assets export
+npm audit
 ```
 
-## Scope and Limitations
+Exports are bundle checks, not signed APK/IPA builds. CI runs these checks and a high-severity dependency security gate. Known unresolved advisories currently prevent a clean security gate; see ENGINEERING_AUDIT.md. No deployment or store submission is configured.
 
-Location permission is needed for current-location use. Routing and place search depend on network access and external OSRM/OpenStreetMap-based services. Fuel prices are manually configurable; the app does not fetch current pump prices.
+## Architecture and structure
 
-Fuel cost is an estimate. Actual consumption can vary with traffic, route conditions, vehicle condition, driving style, and the fuel price in effect at the time of travel.
+Screens orchestrate user actions. Calculator logic is pure; services isolate provider HTTP requests; collection storage validates records and serializes updates; appStorage implements browser localStorage and SDK 54 legacy filesystem access. Existing storage keys and filenames remain compatible.
 
-The project intentionally allows manual fuel-price updates rather than presenting a bundled price as permanently current.
+- src/screens: calculation, result, fuel prices, vehicles, history
+- src/components: reusable controls, native map, render failure boundary
+- src/services: calculation, prices, geocoding, routing, bounded HTTP requests
+- src/storage: durable adapter and serialized collection operations
+- src/utils: invariants, formatting, constants, confirmation and configuration
+- tests: calculation, persistence, provider, configuration and UI regressions
+- .github/workflows/quality.yml: reproducible installation and quality gate
 
-## Future Improvements
+Stored routes contain precise location information. Storage is unencrypted and not cloud synchronized. Failed writes surface errors; corrupt collections are preserved and are not silently replaced with defaults. History failure does not discard a successfully calculated estimate.
 
-- Vehicle profiles
-- Multiple-route comparison
-- Optional cloud synchronization
-- Traffic-aware estimates
-- Automated fuel-price sourcing from a reliable current data provider
+## Engineering documentation
 
-## Author
+[Audit](ENGINEERING_AUDIT.md) · [Architecture](docs/architecture.md) · [Decisions](docs/decisions.md) · [Testing](docs/testing.md) · [Security](docs/security.md) · [Deployment](docs/deployment.md)
 
-Developed by **Asad Abbas**.
+Developed by Asad Abbas.

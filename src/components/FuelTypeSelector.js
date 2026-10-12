@@ -10,18 +10,32 @@ export default function FuelTypeSelector({ selectedFuel, onChange }) {
       <View style={styles.row}>
         <TouchableOpacity
           style={[styles.option, selectedFuel === "petrol" && styles.active]}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: selectedFuel === "petrol" }}
           onPress={() => onChange("petrol")}
         >
-          <Text style={[styles.optionText, selectedFuel === "petrol" && styles.activeText]}>
+          <Text
+            style={[
+              styles.optionText,
+              selectedFuel === "petrol" && styles.activeText,
+            ]}
+          >
             Petrol
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.option, selectedFuel === "diesel" && styles.active]}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: selectedFuel === "diesel" }}
           onPress={() => onChange("diesel")}
         >
-          <Text style={[styles.optionText, selectedFuel === "diesel" && styles.activeText]}>
+          <Text
+            style={[
+              styles.optionText,
+              selectedFuel === "diesel" && styles.activeText,
+            ]}
+          >
             Diesel
           </Text>
         </TouchableOpacity>

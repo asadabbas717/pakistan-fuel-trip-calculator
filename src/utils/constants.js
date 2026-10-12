@@ -1,7 +1,7 @@
 export const DEFAULT_FUEL_PRICES = {
   petrol: 381.78,
   diesel: 388.54,
-  lastUpdated: "Update manually from PSO/OGRA",
+  lastUpdated: "Example prices only — verify and update before use",
 };
 
 export const FUEL_TYPES = {

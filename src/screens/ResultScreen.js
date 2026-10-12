@@ -26,14 +26,19 @@ Estimated Cost: ${formatPKR(trip.result.totalCost)}
 Calculated using FuelTrip PK.
 `;
 
-    await Share.share({ message });
+    try {
+      await Share.share({ message });
+    } catch {
+      alert("Unable to share this result.");
+    }
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Best Estimated Route</Text>
       <Text style={styles.subheading}>
-        This route is selected based on the shortest available route from free routing data.
+        This route is selected based on the shortest available route from free
+        routing data.
       </Text>
 
       <MapViewWeb

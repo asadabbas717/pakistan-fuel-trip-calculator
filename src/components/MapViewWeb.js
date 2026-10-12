@@ -1,12 +1,25 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Text, Platform, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import colors from "../theme/colors";
+import { validLocation, validCoordinates } from "../utils/validation";
 
 export default function MapViewWeb({ start, destination, routeCoordinates }) {
-  if (!start || !destination || !routeCoordinates?.length) {
+  if (
+    !validLocation(start) ||
+    !validLocation(destination) ||
+    !validCoordinates(routeCoordinates)
+  ) {
     return null;
   }
+
+  if (Platform.OS === "web")
+    return (
+      <Text>
+        Map preview is available in the Android and iOS app. Route distance and
+        cost are shown below.
+      </Text>
+    );
 
   const routeJson = JSON.stringify(routeCoordinates);
 
@@ -63,7 +76,12 @@ export default function MapViewWeb({ start, destination, routeCoordinates }) {
 
   return (
     <View style={styles.container}>
-      <WebView originWhitelist={["*"]} source={{ html }} style={styles.webview} />
+      <WebView
+        originWhitelist={["about:blank"]}
+        onShouldStartLoadWithRequest={({ url }) => url === "about:blank"}
+        source={{ html }}
+        style={styles.webview}
+      />
     </View>
   );
 }

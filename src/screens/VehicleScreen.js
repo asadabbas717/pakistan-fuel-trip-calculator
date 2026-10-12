@@ -1,12 +1,26 @@
-import React, { useCallback, useState } from "react";
-import { ScrollView, Text, TextInput, StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
+import { confirmAction } from "../utils/confirmAction";
 import colors from "../theme/colors";
 import PrimaryButton from "../components/PrimaryButton";
-import { deleteVehicle, getVehicles, saveVehicle } from "../storage/vehicleStorage";
+import {
+  deleteVehicle,
+  getVehicles,
+  saveVehicle,
+} from "../storage/vehicleStorage";
 
 export default function VehicleScreen() {
+  const busy = useRef(false);
+  const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [name, setName] = useState("");
   const [average, setAverage] = useState("");
@@ -14,12 +28,16 @@ export default function VehicleScreen() {
   useFocusEffect(
     useCallback(() => {
       loadVehicles();
-    }, [])
+    }, []),
   );
 
   async function loadVehicles() {
-    const saved = await getVehicles();
-    setVehicles(saved);
+    try {
+      const saved = await getVehicles();
+      setVehicles(saved);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   async function handleSave() {
@@ -28,26 +46,40 @@ export default function VehicleScreen() {
       return;
     }
 
-    if (!average || Number(average) <= 0) {
+    if (!Number.isFinite(Number(average)) || Number(average) <= 0) {
       alert("Please enter valid average.");
       return;
     }
 
-    const updated = await saveVehicle({
-      name: name.trim(),
-      averageKmPerLiter: Number(average),
-    });
+    if (busy.current) return;
+    busy.current = true;
+    setSaving(true);
+    try {
+      const updated = await saveVehicle({
+        name: name.trim(),
+        averageKmPerLiter: Number(average),
+      });
 
-    setVehicles(updated);
-    setName("");
-    setAverage("");
+      setVehicles(updated);
+      setName("");
+      setAverage("");
 
-    alert("Vehicle saved.");
+      alert("Vehicle saved.");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      busy.current = false;
+      setSaving(false);
+    }
   }
 
   async function handleDelete(id) {
-    const updated = await deleteVehicle(id);
-    setVehicles(updated);
+    try {
+      const updated = await deleteVehicle(id);
+      setVehicles(updated);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   return (
@@ -61,6 +93,7 @@ export default function VehicleScreen() {
         <Text style={styles.label}>Vehicle Name</Text>
         <TextInput
           style={styles.input}
+          accessibilityLabel="Vehicle name"
           placeholder="Example: Honda Civic"
           value={name}
           onChangeText={setName}
@@ -69,13 +102,18 @@ export default function VehicleScreen() {
         <Text style={styles.label}>Average km/litre</Text>
         <TextInput
           style={styles.input}
+          accessibilityLabel="Vehicle average in kilometres per litre"
           placeholder="Example: 12"
           value={average}
           onChangeText={setAverage}
           keyboardType="numeric"
         />
 
-        <PrimaryButton title="Save Vehicle" onPress={handleSave} />
+        <PrimaryButton
+          title="Save Vehicle"
+          loading={saving}
+          onPress={handleSave}
+        />
       </View>
 
       <Text style={styles.sectionTitle}>My Vehicles</Text>
@@ -91,7 +129,13 @@ export default function VehicleScreen() {
 
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => handleDelete(vehicle.id)}
+            accessibilityRole="button"
+            accessibilityLabel={"Delete " + vehicle.name}
+            onPress={() =>
+              confirmAction("Delete " + vehicle.name + "?", () =>
+                handleDelete(vehicle.id),
+              )
+            }
           >
             <Text style={styles.deleteText}>Delete</Text>
           </TouchableOpacity>

@@ -64,3 +64,21 @@ test("hung requests abort and clear their timer", async () => {
   await result;
   expect(jest.getTimerCount()).toBe(0);
 });
+test("editing a location aborts its HTTP request and clears timeout and listener", async () => {
+  jest.useFakeTimers();
+  const controller = new AbortController();
+  const remove = jest.spyOn(controller.signal, "removeEventListener");
+  fetch.mockImplementation(
+    (_url, { signal }) =>
+      new Promise((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(new Error("aborted")));
+      }),
+  );
+  const result = expect(
+    fetchJson("https://example.test", { signal: controller.signal }),
+  ).rejects.toThrow("cancelled");
+  controller.abort();
+  await result;
+  expect(jest.getTimerCount()).toBe(0);
+  expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));
+});

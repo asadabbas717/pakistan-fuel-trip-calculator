@@ -20,7 +20,7 @@ Context: Infinity and malformed geometry could reach cost and map interpolation.
 
 ## Preserve demo defaults and expose deployment limitations
 
-Context: Public geocoding/routing servers are unsuitable as an unrestricted app infrastructure. Decision: configurable HTTPS endpoints, explicit search caching/throttling, and documented provider policy limits. Alternative: invent a server or claim client throttling solves aggregate limits. Consequence: public release requires an approved provider and device/CORS verification. Web uses a clear map-unavailable message because react-native-webview does not implement a browser map.
+Context: Public geocoding/routing servers are unsuitable as an unrestricted app infrastructure. Decision: configurable HTTPS endpoints, Photon autocomplete with caching, cancellation and throttling, and documented provider policy limits. Alternative: invent a server or claim client throttling solves aggregate limits. Consequence: public release requires an approved provider and device/CORS verification. Web uses a clear map-unavailable message because react-native-webview does not implement a browser map.
 
 ## Free operation and recovery follow-up
 

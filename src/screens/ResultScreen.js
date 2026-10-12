@@ -1,13 +1,17 @@
 import React from "react";
-import { ScrollView, Text, StyleSheet, Share, View } from "react-native";
+import { Text, StyleSheet, Share } from "react-native";
 
-import colors from "../theme/colors";
+import JourneyHero from "../components/JourneyHero";
+import Reveal from "../components/Reveal";
+import Screen from "../components/Screen";
+import { useThemedStyles } from "../theme/ThemeContext";
 import CostSummaryCard from "../components/CostSummaryCard";
 import MapViewWeb from "../components/MapViewWeb";
 import PrimaryButton from "../components/PrimaryButton";
 import { formatKm, formatLiters, formatPKR } from "../utils/formatters";
 
 export default function ResultScreen({ route, navigation }) {
+  const { styles } = useThemedStyles(createStyles);
   const { trip } = route.params;
   const manual = trip.route.source === "manual";
 
@@ -36,16 +40,16 @@ Calculated using FuelTrip PK.
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>
-        {manual ? "Manual Distance Estimate" : "Best Estimated Route"}
-      </Text>
-      <Text style={styles.subheading}>
-        {manual
-          ? "Calculated from the distance you entered. No route, map or travel time was retrieved."
-          : "This route is selected based on the shortest available alternative from free routing data."}
-      </Text>
-
+    <Screen style={styles.container} contentContainerStyle={styles.content}>
+      <JourneyHero
+        eyebrow="YOUR JOURNEY, AT A GLANCE"
+        title="Ready for the road."
+        subtitle={
+          manual
+            ? "Your distance. Your estimate. All calculated offline."
+            : "Your fuel budget and route, together in one place."
+        }
+      />
       {!manual && (
         <MapViewWeb
           start={trip.start}
@@ -54,13 +58,13 @@ Calculated using FuelTrip PK.
         />
       )}
 
-      <View style={styles.locationCard}>
+      <Reveal delay={80} style={styles.locationCard}>
         <Text style={styles.locationLabel}>From</Text>
         <Text style={styles.locationText}>{trip.start.name}</Text>
 
         <Text style={styles.locationLabel}>To</Text>
         <Text style={styles.locationText}>{trip.destination.name}</Text>
-      </View>
+      </Reveal>
 
       <CostSummaryCard
         result={trip.result}
@@ -68,7 +72,7 @@ Calculated using FuelTrip PK.
         fuelPrice={trip.fuelPrice}
       />
 
-      <View style={styles.infoCard}>
+      <Reveal delay={160} style={styles.infoCard}>
         <Text style={styles.infoTitle}>Route Info</Text>
 
         <Text style={styles.infoText}>
@@ -88,7 +92,7 @@ Calculated using FuelTrip PK.
         <Text style={styles.infoText}>
           Trip type: {trip.isReturnTrip ? "Return trip" : "One-way trip"}
         </Text>
-      </View>
+      </Reveal>
 
       <PrimaryButton title="Share Result" onPress={shareResult} />
 
@@ -97,62 +101,63 @@ Calculated using FuelTrip PK.
         onPress={() => navigation.navigate("Home")}
         variant="outline"
       />
-    </ScrollView>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 18,
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: colors.primary,
-  },
-  subheading: {
-    color: colors.muted,
-    marginTop: 5,
-    marginBottom: 10,
-    lineHeight: 20,
-  },
-  locationCard: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginVertical: 8,
-  },
-  locationLabel: {
-    color: colors.primary,
-    fontWeight: "900",
-    marginTop: 4,
-  },
-  locationText: {
-    color: colors.text,
-    marginBottom: 8,
-    lineHeight: 19,
-  },
-  infoCard: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginVertical: 10,
-  },
-  infoTitle: {
-    fontSize: 17,
-    color: colors.text,
-    fontWeight: "900",
-    marginBottom: 8,
-  },
-  infoText: {
-    color: colors.muted,
-    marginVertical: 3,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 18,
+    },
+    heading: {
+      fontSize: 24,
+      fontWeight: "900",
+      color: colors.primary,
+    },
+    subheading: {
+      color: colors.muted,
+      marginTop: 5,
+      marginBottom: 10,
+      lineHeight: 20,
+    },
+    locationCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginVertical: 8,
+    },
+    locationLabel: {
+      color: colors.primary,
+      fontWeight: "900",
+      marginTop: 4,
+    },
+    locationText: {
+      color: colors.text,
+      marginBottom: 8,
+      lineHeight: 19,
+    },
+    infoCard: {
+      backgroundColor: colors.card,
+      borderRadius: 26,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginVertical: 10,
+    },
+    infoTitle: {
+      fontSize: 17,
+      color: colors.text,
+      fontWeight: "900",
+      marginBottom: 8,
+    },
+    infoText: {
+      color: colors.muted,
+      marginVertical: 3,
+    },
+  });

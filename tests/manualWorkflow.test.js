@@ -1,3 +1,11 @@
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 48, left: 0, right: 0 }),
+}));
+jest.mock("../src/components/Reveal", () => {
+  const React = require("react");
+  return ({ children, style }) =>
+    React.createElement("View", { style }, children);
+});
 jest.mock("react-native", () => ({
   View: "View",
   Text: "Text",

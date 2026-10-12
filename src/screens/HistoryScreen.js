@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
 import {
-  ScrollView,
   Text,
   TextInput,
   Share,
@@ -12,7 +11,8 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 
 import { confirmAction } from "../utils/confirmAction";
-import colors from "../theme/colors";
+import Screen from "../components/Screen";
+import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   clearTripHistory,
@@ -23,6 +23,7 @@ import {
 import { formatKm, formatPKR } from "../utils/formatters";
 
 export default function HistoryScreen({ navigation }) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const [history, setHistory] = useState([]);
   const restoringRef = useRef(false);
   const [backupText, setBackupText] = useState("");
@@ -94,7 +95,7 @@ export default function HistoryScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <Screen style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Trip History</Text>
       <Text style={styles.subheading}>
         Your last 25 calculated trips are saved on this device.
@@ -160,6 +161,7 @@ export default function HistoryScreen({ navigation }) {
           disabled={restoring}
         />
         <TextInput
+          placeholderTextColor={colors.muted}
           accessibilityLabel="History backup JSON"
           multiline
           style={styles.backupInput}
@@ -181,83 +183,84 @@ export default function HistoryScreen({ navigation }) {
           }
         />
       </View>
-    </ScrollView>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  backupInput: {
-    minHeight: 100,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 12,
-    marginVertical: 10,
-    color: colors.text,
-  },
-  container: {
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 18,
-  },
-  heading: {
-    fontSize: 25,
-    fontWeight: "900",
-    color: colors.primary,
-  },
-  subheading: {
-    color: colors.muted,
-    marginTop: 6,
-    marginBottom: 14,
-  },
-  emptyCard: {
-    backgroundColor: "#fff",
-    padding: 30,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: colors.muted,
-    fontWeight: "700",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 10,
-  },
-  routeText: {
-    color: colors.text,
-    fontWeight: "800",
-  },
-  arrow: {
-    color: colors.primary,
-    fontSize: 18,
-    fontWeight: "900",
-    marginVertical: 3,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  muted: {
-    color: colors.muted,
-    fontWeight: "700",
-  },
-  cost: {
-    color: colors.success,
-    fontWeight: "900",
-    fontSize: 16,
-  },
-  date: {
-    color: colors.muted,
-    fontSize: 12,
-    marginTop: 8,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    backupInput: {
+      minHeight: 100,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 12,
+      marginVertical: 10,
+      color: colors.text,
+    },
+    container: {
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 18,
+    },
+    heading: {
+      fontSize: 25,
+      fontWeight: "900",
+      color: colors.primary,
+    },
+    subheading: {
+      color: colors.muted,
+      marginTop: 6,
+      marginBottom: 14,
+    },
+    emptyCard: {
+      backgroundColor: colors.card,
+      padding: 30,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+    },
+    emptyText: {
+      color: colors.muted,
+      fontWeight: "700",
+    },
+    card: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 10,
+    },
+    routeText: {
+      color: colors.text,
+      fontWeight: "800",
+    },
+    arrow: {
+      color: colors.primary,
+      fontSize: 18,
+      fontWeight: "900",
+      marginVertical: 3,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    muted: {
+      color: colors.muted,
+      fontWeight: "700",
+    },
+    cost: {
+      color: colors.success,
+      fontWeight: "900",
+      fontSize: 16,
+    },
+    date: {
+      color: colors.muted,
+      fontSize: 12,
+      marginTop: 8,
+    },
+  });

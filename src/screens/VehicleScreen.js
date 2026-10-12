@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
 import {
-  ScrollView,
   Text,
   TextInput,
   StyleSheet,
@@ -10,7 +9,8 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 
 import { confirmAction } from "../utils/confirmAction";
-import colors from "../theme/colors";
+import Screen from "../components/Screen";
+import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   deleteVehicle,
@@ -19,6 +19,7 @@ import {
 } from "../storage/vehicleStorage";
 
 export default function VehicleScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const busy = useRef(false);
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
@@ -83,7 +84,7 @@ export default function VehicleScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <Screen style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Saved Vehicles</Text>
       <Text style={styles.subheading}>
         Save your car/bike average to quickly calculate future trip costs.
@@ -92,6 +93,7 @@ export default function VehicleScreen() {
       <View style={styles.card}>
         <Text style={styles.label}>Vehicle Name</Text>
         <TextInput
+          placeholderTextColor={colors.muted}
           style={styles.input}
           accessibilityLabel="Vehicle name"
           placeholder="Example: Honda Civic"
@@ -101,6 +103,7 @@ export default function VehicleScreen() {
 
         <Text style={styles.label}>Average km/litre</Text>
         <TextInput
+          placeholderTextColor={colors.muted}
           style={styles.input}
           accessibilityLabel="Vehicle average in kilometres per litre"
           placeholder="Example: 12"
@@ -141,84 +144,85 @@ export default function VehicleScreen() {
           </TouchableOpacity>
         </View>
       ))}
-    </ScrollView>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 18,
-  },
-  heading: {
-    fontSize: 25,
-    fontWeight: "900",
-    color: colors.primary,
-  },
-  subheading: {
-    color: colors.muted,
-    marginTop: 6,
-    lineHeight: 21,
-    marginBottom: 14,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  label: {
-    color: colors.text,
-    fontWeight: "800",
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  input: {
-    height: 52,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    fontSize: 16,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "900",
-    marginTop: 18,
-    marginBottom: 10,
-  },
-  vehicleCard: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  vehicleName: {
-    color: colors.text,
-    fontWeight: "900",
-    fontSize: 16,
-  },
-  vehicleAverage: {
-    color: colors.muted,
-    marginTop: 4,
-  },
-  deleteButton: {
-    backgroundColor: "#FEE2E2",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  deleteText: {
-    color: colors.danger,
-    fontWeight: "800",
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 18,
+    },
+    heading: {
+      fontSize: 25,
+      fontWeight: "900",
+      color: colors.primary,
+    },
+    subheading: {
+      color: colors.muted,
+      marginTop: 6,
+      lineHeight: 21,
+      marginBottom: 14,
+    },
+    card: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    label: {
+      color: colors.text,
+      fontWeight: "800",
+      marginTop: 12,
+      marginBottom: 8,
+    },
+    input: {
+      height: 52,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      fontSize: 16,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "900",
+      marginTop: 18,
+      marginBottom: 10,
+    },
+    vehicleCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 10,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    vehicleName: {
+      color: colors.text,
+      fontWeight: "900",
+      fontSize: 16,
+    },
+    vehicleAverage: {
+      color: colors.muted,
+      marginTop: 4,
+    },
+    deleteButton: {
+      backgroundColor: "#FEE2E2",
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+    },
+    deleteText: {
+      color: colors.danger,
+      fontWeight: "800",
+    },
+  });

@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import colors from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeContext";
 import { searchPlace } from "../services/geocodingService";
 
 export default function LocationInput({ label, placeholder, value, onSelect }) {
+  const { colors, styles } = useThemedStyles(createStyles);
+  const [message, setMessage] = useState("");
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,27 +36,44 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
     onSelect(null);
   }
 
-  async function handleSearch() {
+  useEffect(() => {
     const request = ++generation.current;
-    try {
+    setResults([]);
+    setMessage("");
+    setLoading(false);
+    if (query.trim().length < 3 || query === value?.name) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
       setLoading(true);
-      setResults([]);
-
-      const places = await searchPlace(query);
-      if (request !== generation.current) return;
-      setResults(places);
-      if (!places.length) alert("No locations found. Try a different search.");
-    } catch (error) {
-      if (request === generation.current) alert(error.message);
-    } finally {
-      if (request === generation.current) setLoading(false);
-    }
-  }
+      try {
+        const places = await searchPlace(query, { signal: controller.signal });
+        if (request !== generation.current) return;
+        setResults(places);
+        if (!places.length)
+          setMessage(
+            "No matches. Try a nearby town or a more specific address.",
+          );
+      } catch (error) {
+        if (request === generation.current && !controller.signal.aborted)
+          setMessage(error.message + " You can also enter distance manually.");
+      } finally {
+        if (request === generation.current) setLoading(false);
+      }
+    }, 750);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+      generation.current += 1;
+    };
+  }, [query, value?.name]);
 
   function handleSelect(place) {
+    generation.current += 1;
     onSelect(place);
     setQuery(place.name);
     setResults([]);
+    setMessage("");
+    setLoading(false);
   }
 
   return (
@@ -68,24 +87,25 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
           value={query}
           accessibilityLabel={label}
           onChangeText={changeQuery}
+          maxLength={200}
+          placeholderTextColor={colors.muted}
+          autoCorrect={false}
           multiline
         />
 
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={"Search " + label}
-          disabled={loading}
-          style={styles.searchButton}
-          onPress={handleSearch}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Text style={styles.searchText}>Search</Text>
-          )}
-        </TouchableOpacity>
+        {loading && <ActivityIndicator color={colors.primary} size="small" />}
       </View>
 
+      {!!message && (
+        <Text accessibilityLiveRegion="polite" style={styles.message}>
+          {message}
+        </Text>
+      )}
+      {!value && query.length < 3 && (
+        <Text style={styles.message}>
+          Type at least 3 characters. Choose a suggestion below.
+        </Text>
+      )}
       {results.map((item) => (
         <TouchableOpacity
           accessibilityRole="button"
@@ -101,54 +121,51 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-  },
-  label: {
-    fontSize: 15,
-    color: colors.text,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    minHeight: 52,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: colors.text,
-  },
-  searchButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 52,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchText: {
-    color: "#fff",
-    fontWeight: "700",
-  },
-  resultItem: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginTop: 6,
-  },
-  resultText: {
-    color: colors.text,
-    fontSize: 13,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    message: {
+      color: colors.muted,
+      fontSize: 12,
+      lineHeight: 18,
+      marginTop: 8,
+    },
+    container: {
+      marginVertical: 8,
+    },
+    label: {
+      fontSize: 15,
+      color: colors.text,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    searchRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    input: {
+      flex: 1,
+      minHeight: 52,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      color: colors.text,
+    },
+    resultItem: {
+      minHeight: 48,
+      justifyContent: "center",
+      backgroundColor: colors.card,
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginTop: 6,
+    },
+    resultText: {
+      color: colors.text,
+      fontSize: 13,
+    },
+  });

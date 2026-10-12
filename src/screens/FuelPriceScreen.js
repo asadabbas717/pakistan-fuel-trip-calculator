@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ScrollView,
   Text,
   TextInput,
   StyleSheet,
@@ -10,7 +9,8 @@ import {
 } from "react-native";
 
 import { confirmAction } from "../utils/confirmAction";
-import colors from "../theme/colors";
+import Screen from "../components/Screen";
+import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   getFuelPrices,
@@ -29,6 +29,7 @@ function isValidNumber(value) {
 }
 
 export default function FuelPriceScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const busy = useRef(false);
   const [petrol, setPetrol] = useState("");
   const [diesel, setDiesel] = useState("");
@@ -147,7 +148,8 @@ export default function FuelPriceScreen() {
       style={styles.keyboardView}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
+      <Screen
+        automaticallyAdjustKeyboardInsets={false}
         style={styles.container}
         contentContainerStyle={styles.content}
       >
@@ -166,6 +168,7 @@ export default function FuelPriceScreen() {
               <Text style={styles.label}>Petrol Price / Litre</Text>
 
               <TextInput
+                placeholderTextColor={colors.muted}
                 style={styles.input}
                 accessibilityLabel="Petrol price per litre"
                 editable={!saving}
@@ -175,12 +178,12 @@ export default function FuelPriceScreen() {
                   Platform.OS === "android" ? "numeric" : "decimal-pad"
                 }
                 placeholder="Example: 381.78"
-                placeholderTextColor="#9CA3AF"
               />
 
               <Text style={styles.label}>Diesel Price / Litre</Text>
 
               <TextInput
+                placeholderTextColor={colors.muted}
                 style={styles.input}
                 accessibilityLabel="Diesel price per litre"
                 editable={!saving}
@@ -190,7 +193,6 @@ export default function FuelPriceScreen() {
                   Platform.OS === "android" ? "numeric" : "decimal-pad"
                 }
                 placeholder="Example: 388.54"
-                placeholderTextColor="#9CA3AF"
               />
 
               <Text style={styles.updatedText}>
@@ -247,83 +249,84 @@ export default function FuelPriceScreen() {
             prices or verify their accuracy.
           </Text>
         </View>
-      </ScrollView>
+      </Screen>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  keyboardView: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 18,
-  },
-  heading: {
-    fontSize: 25,
-    fontWeight: "900",
-    color: colors.primary,
-  },
-  subheading: {
-    color: colors.muted,
-    marginTop: 6,
-    lineHeight: 21,
-    marginBottom: 14,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  loadingText: {
-    color: colors.muted,
-    fontWeight: "700",
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  label: {
-    color: colors.text,
-    fontWeight: "800",
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  input: {
-    height: 52,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    backgroundColor: "#fff",
-    fontSize: 16,
-    color: colors.text,
-  },
-  updatedText: {
-    color: colors.muted,
-    marginTop: 12,
-    marginBottom: 8,
-    fontWeight: "700",
-  },
-  noteCard: {
-    backgroundColor: colors.primaryLight,
-    padding: 16,
-    borderRadius: 18,
-    marginTop: 14,
-  },
-  noteTitle: {
-    color: colors.primary,
-    fontWeight: "900",
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  noteText: {
-    color: colors.text,
-    lineHeight: 21,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    keyboardView: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 18,
+    },
+    heading: {
+      fontSize: 25,
+      fontWeight: "900",
+      color: colors.primary,
+    },
+    subheading: {
+      color: colors.muted,
+      marginTop: 6,
+      lineHeight: 21,
+      marginBottom: 14,
+    },
+    card: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 26,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    loadingText: {
+      color: colors.muted,
+      fontWeight: "700",
+      textAlign: "center",
+      paddingVertical: 20,
+    },
+    label: {
+      color: colors.text,
+      fontWeight: "800",
+      marginTop: 12,
+      marginBottom: 8,
+    },
+    input: {
+      height: 52,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      backgroundColor: colors.card,
+      fontSize: 16,
+      color: colors.text,
+    },
+    updatedText: {
+      color: colors.muted,
+      marginTop: 12,
+      marginBottom: 8,
+      fontWeight: "700",
+    },
+    noteCard: {
+      backgroundColor: colors.primaryLight,
+      padding: 16,
+      borderRadius: 26,
+      marginTop: 14,
+    },
+    noteTitle: {
+      color: colors.primary,
+      fontWeight: "900",
+      fontSize: 16,
+      marginBottom: 6,
+    },
+    noteText: {
+      color: colors.text,
+      lineHeight: 21,
+    },
+  });

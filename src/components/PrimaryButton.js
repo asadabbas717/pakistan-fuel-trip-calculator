@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import colors from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeContext";
 
 export default function PrimaryButton({
   title,
@@ -14,6 +14,7 @@ export default function PrimaryButton({
   disabled = false,
   variant = "primary",
 }) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const isOutline = variant === "outline";
 
   return (
@@ -30,7 +31,9 @@ export default function PrimaryButton({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? colors.primary : "#fff"} />
+        <ActivityIndicator
+          color={isOutline ? colors.primary : colors.onPrimary}
+        />
       ) : (
         <Text style={[styles.text, isOutline && styles.outlineText]}>
           {title}
@@ -40,27 +43,28 @@ export default function PrimaryButton({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 6,
-  },
-  outlineButton: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  text: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  outlineText: {
-    color: colors.primary,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    button: {
+      backgroundColor: colors.primary,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      marginVertical: 6,
+    },
+    outlineButton: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.primary,
+    },
+    text: {
+      color: colors.onPrimary,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    outlineText: {
+      color: colors.primary,
+    },
+  });

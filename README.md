@@ -25,11 +25,11 @@ npm start
 # or npm run android / npm run ios / npm run web
 ```
 
-Optional: copy .env.example to .env and set EXPO_PUBLIC_GEOCODING_URL and EXPO_PUBLIC_ROUTING_URL to approved HTTPS provider endpoints with compatible Nominatim and OSRM response contracts. These values are embedded in the bundle: **never include credentials or secrets**. Restart Expo after changes. No server, database, account, or API secret is required.
+Optional: copy .env.example to .env and set EXPO_PUBLIC_GEOCODING_URL and EXPO_PUBLIC_ROUTING_URL to approved HTTPS provider endpoints with compatible Photon GeoJSON and OSRM response contracts. These values are embedded in the bundle: **never include credentials or secrets**. Restart Expo after changes. No server, database, account, or API secret is required.
 
 **Free-service requirement:** No paid API, subscription, billing account or API key is required. Manual-distance calculations, profiles and history work on-device. Online features use optional free public endpoints; they are not unlimited.
 
-Public endpoints are demonstration defaults with no availability guarantee. Public Nominatim has a strict usage policy, including an aggregate one-request-per-second limit and no autocomplete. The client uses explicit search, caching, and per-instance throttling, which cannot enforce limits across a distributed app. Choose an approved provider or a controlled proxy before a public release. Browser identification and CORS also require provider review.
+Public endpoints are demonstration defaults with no availability guarantee. Photon supports search-as-you-type. Suggestions appear after a 750 ms typing pause (minimum three characters), with caching, cancellation and serialized requests at least 1.1 seconds apart per app instance. The public demo permits reasonable usage, can throttle heavy use and has no uptime guarantee. Choose an approved provider or a controlled proxy before a public release. Browser identification and CORS also require provider review.
 
 ## Development and verification
 
@@ -67,3 +67,9 @@ Developed by Asad Abbas.
 ## History backup and restore
 
 Open History and choose Export History Backup. On mobile, save or share the complete JSON text through your device; on web, copy the JSON shown in the backup field into a private text file. To restore, paste the full text and choose Restore History Backup, then confirm replacement. Only history is included: fuel prices and vehicle profiles remain unchanged. Invalid, oversized, unknown-version and duplicate-ID backups are rejected before writing. Keep backups private because they contain route labels and, for online trips, coordinates.
+
+## Appearance and location suggestions
+
+Open **Theme** in the header to choose Forest & mint, Ocean & lavender, or Terracotta & sand, with Light, Dark, or Automatic device mode. Preferences stay on your device. Subtle entrance animations respect Reduce Motion. Screens include bottom and landscape side safe-area spacing so system navigation controls do not cover actions.
+
+Type a starting point or destination and choose an automatic suggestion; there are no location search buttons. Calculation remains an explicit action after choosing locations and vehicle settings. Existing custom geocoding configuration must use a Photon-compatible endpoint; replace old Nominatim URLs using `.env.example` and restart Expo. Photon and routing require internet; manual distance remains fully offline and requires no paid service.

@@ -12,7 +12,10 @@ import {
 import * as Location from "expo-location";
 import { useFocusEffect } from "@react-navigation/native";
 
-import colors from "../theme/colors";
+import JourneyHero from "../components/JourneyHero";
+import Reveal from "../components/Reveal";
+import Screen from "../components/Screen";
+import { useThemedStyles } from "../theme/ThemeContext";
 import FuelTypeSelector from "../components/FuelTypeSelector";
 import LocationInput from "../components/LocationInput";
 import PrimaryButton from "../components/PrimaryButton";
@@ -29,6 +32,7 @@ function sanitizeAverage(value) {
 }
 
 export default function HomeScreen({ navigation }) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const calculatingRef = useRef(false);
   const [fuelType, setFuelType] = useState("petrol");
   const [fuelPrices, setFuelPrices] = useState({});
@@ -198,14 +202,8 @@ export default function HomeScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Calculate your trip fuel cost</Text>
-
-      <Text style={styles.subheading}>
-        Search your route or enter a distance, choose fuel type, enter car
-        average, and get estimated fuel cost.
-      </Text>
-
+    <Screen style={styles.container} contentContainerStyle={styles.content}>
+      <JourneyHero />
       <View style={styles.quickActions}>
         <TouchableOpacity
           accessibilityRole="button"
@@ -232,7 +230,8 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
+      <Reveal delay={100} style={styles.card}>
+        <Text style={styles.step}>01 / BUILD YOUR JOURNEY</Text>
         <FuelTypeSelector selectedFuel={fuelType} onChange={setFuelType} />
 
         <Text style={styles.priceText}>
@@ -261,6 +260,7 @@ export default function HomeScreen({ navigation }) {
           <>
             <Text style={styles.label}>One-way distance (km)</Text>
             <TextInput
+              placeholderTextColor={colors.muted}
               accessibilityLabel="One-way distance in kilometres"
               style={styles.input}
               keyboardType="decimal-pad"
@@ -270,6 +270,7 @@ export default function HomeScreen({ navigation }) {
             />
             <Text style={styles.label}>From (optional)</Text>
             <TextInput
+              placeholderTextColor={colors.muted}
               accessibilityLabel="Manual starting point"
               style={styles.input}
               value={startName}
@@ -279,6 +280,7 @@ export default function HomeScreen({ navigation }) {
             />
             <Text style={styles.label}>To (optional)</Text>
             <TextInput
+              placeholderTextColor={colors.muted}
               accessibilityLabel="Manual destination"
               style={styles.input}
               value={destinationName}
@@ -331,11 +333,11 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.label}>Vehicle Average km/litre</Text>
 
         <TextInput
+          placeholderTextColor={colors.muted}
           accessibilityLabel="Vehicle average in kilometres per litre"
           style={styles.input}
           keyboardType={Platform.OS === "android" ? "numeric" : "decimal-pad"}
           placeholder="Example: 12"
-          placeholderTextColor="#9CA3AF"
           value={average}
           onChangeText={handleAverageChange}
         />
@@ -388,7 +390,7 @@ export default function HomeScreen({ navigation }) {
           onPress={calculateTrip}
           loading={calculating}
         />
-      </View>
+      </Reveal>
 
       <Text style={styles.note}>
         Online search uses free OpenStreetMap-based services with usage limits.
@@ -396,121 +398,133 @@ export default function HomeScreen({ navigation }) {
         Estimates exclude tolls and traffic; a return trip doubles the one-way
         distance. Map and place data © OpenStreetMap contributors.
       </Text>
-    </ScrollView>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 18,
-  },
-  heading: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: colors.primary,
-    marginTop: 10,
-  },
-  subheading: {
-    color: colors.muted,
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 6,
-    marginBottom: 14,
-  },
-  quickActions: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 10,
-  },
-  quickButton: {
-    flex: 1,
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  quickButtonText: {
-    color: colors.primary,
-    fontWeight: "800",
-    fontSize: 12,
-  },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  priceText: {
-    backgroundColor: colors.primaryLight,
-    color: colors.primary,
-    padding: 12,
-    borderRadius: 12,
-    fontWeight: "800",
-    marginVertical: 8,
-  },
-  label: {
-    fontSize: 15,
-    color: colors.text,
-    fontWeight: "700",
-    marginTop: 10,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    height: 52,
-    fontSize: 16,
-    color: colors.text,
-  },
-  selectedText: {
-    color: colors.success,
-    fontSize: 13,
-    marginTop: 6,
-    fontWeight: "700",
-  },
-  vehicleBox: {
-    marginVertical: 12,
-  },
-  vehicleTitle: {
-    color: colors.text,
-    fontWeight: "800",
-    marginBottom: 8,
-  },
-  vehicleChip: {
-    backgroundColor: colors.primaryLight,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  vehicleChipText: {
-    color: colors.primary,
-    fontWeight: "700",
-    fontSize: 12,
-  },
-  switchRow: {
-    marginVertical: 12,
-    paddingVertical: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  hint: {
-    color: colors.muted,
-    fontSize: 12,
-  },
-  note: {
-    color: colors.muted,
-    fontSize: 12,
-    marginTop: 14,
-    lineHeight: 18,
-    textAlign: "center",
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    step: {
+      fontSize: 10,
+      letterSpacing: 2,
+      color: colors.muted,
+      fontWeight: "800",
+      marginBottom: 20,
+    },
+    container: {
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 18,
+    },
+    heading: {
+      fontSize: 28,
+      fontWeight: "900",
+      color: colors.primary,
+      marginTop: 10,
+    },
+    subheading: {
+      color: colors.muted,
+      fontSize: 15,
+      lineHeight: 22,
+      marginTop: 6,
+      marginBottom: 14,
+    },
+    quickActions: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 10,
+    },
+    quickButton: {
+      minHeight: 48,
+      justifyContent: "center",
+      flex: 1,
+      backgroundColor: colors.primaryLight,
+      borderRadius: 12,
+      paddingVertical: 10,
+      alignItems: "center",
+    },
+    quickButtonText: {
+      color: colors.primary,
+      fontWeight: "800",
+      fontSize: 12,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 26,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    priceText: {
+      backgroundColor: colors.primaryLight,
+      color: colors.primary,
+      padding: 12,
+      borderRadius: 12,
+      fontWeight: "800",
+      marginVertical: 8,
+    },
+    label: {
+      fontSize: 15,
+      color: colors.text,
+      fontWeight: "700",
+      marginTop: 10,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      height: 52,
+      fontSize: 16,
+      color: colors.text,
+    },
+    selectedText: {
+      color: colors.success,
+      fontSize: 13,
+      marginTop: 6,
+      fontWeight: "700",
+    },
+    vehicleBox: {
+      marginVertical: 12,
+    },
+    vehicleTitle: {
+      color: colors.text,
+      fontWeight: "800",
+      marginBottom: 8,
+    },
+    vehicleChip: {
+      minHeight: 44,
+      justifyContent: "center",
+      backgroundColor: colors.primaryLight,
+      paddingVertical: 9,
+      paddingHorizontal: 12,
+      borderRadius: 26,
+      marginRight: 8,
+    },
+    vehicleChipText: {
+      color: colors.primary,
+      fontWeight: "700",
+      fontSize: 12,
+    },
+    switchRow: {
+      marginVertical: 12,
+      paddingVertical: 10,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    hint: {
+      color: colors.muted,
+      fontSize: 12,
+    },
+    note: {
+      color: colors.muted,
+      fontSize: 12,
+      marginTop: 14,
+      lineHeight: 18,
+      textAlign: "center",
+    },
+  });

@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, Platform, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
-import colors from "../theme/colors";
+import { useThemedStyles } from "../theme/ThemeContext";
 import { validLocation, validCoordinates } from "../utils/validation";
 
 export default function MapViewWeb({ start, destination, routeCoordinates }) {
+  const { styles } = useThemedStyles(createStyles);
   if (
     !validLocation(start) ||
     !validLocation(destination) ||
@@ -86,16 +87,17 @@ export default function MapViewWeb({ start, destination, routeCoordinates }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    height: 280,
-    borderRadius: 18,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginVertical: 10,
-  },
-  webview: {
-    flex: 1,
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    container: {
+      height: 280,
+      borderRadius: 26,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginVertical: 10,
+    },
+    webview: {
+      flex: 1,
+    },
+  });

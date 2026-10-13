@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { confirmAction } from "../utils/confirmAction";
+import { confirmAction, showMessage } from "../utils/confirmAction";
+import DestructiveButton from "../components/DestructiveButton";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -40,7 +41,7 @@ export default function HistoryScreen({ navigation }) {
           if (active) setHistory(trips);
         })
         .catch((error) => {
-          if (active) alert(error.message);
+          if (active) showMessage(error.message);
         });
       return () => {
         active = false;
@@ -54,7 +55,7 @@ export default function HistoryScreen({ navigation }) {
     try {
       await action();
     } catch (error) {
-      alert(error.message);
+      showMessage(error.message);
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -81,7 +82,7 @@ export default function HistoryScreen({ navigation }) {
         run(async () => {
           setHistory(await restoreAppBackup(pending.text, mode));
           setPending(null);
-          alert(
+          showMessage(
             mode === "replace" && pending.data.version === 2
               ? "Backup restored. Restart the app to apply restored appearance and default trip preferences."
               : "Backup restored.",
@@ -156,26 +157,21 @@ export default function HistoryScreen({ navigation }) {
             >
               <Text style={styles.arrow}>Plan again →</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              accessibilityRole="button"
+            <DestructiveButton
               accessibilityLabel={"Delete trip to " + trip.destination.name}
               disabled={busy}
-              style={{ padding: 14 }}
               onPress={() =>
                 confirmAction("Delete this saved trip?", () =>
                   run(async () => setHistory(await deleteTrip(trip.id))),
                 )
               }
-            >
-              <Text style={{ color: colors.danger }}>Delete</Text>
-            </TouchableOpacity>
+            />
           </View>
         </View>
       ))}
       {!!history.length && (
-        <PrimaryButton
+        <DestructiveButton
           title="Clear History"
-          variant="outline"
           disabled={busy}
           onPress={() =>
             confirmAction("Delete all saved trip history?", () =>

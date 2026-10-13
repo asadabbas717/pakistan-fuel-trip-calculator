@@ -1,3 +1,4 @@
+import { showMessage } from "../utils/confirmAction";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -106,7 +107,7 @@ export default function HomeScreen({ navigation, route }) {
             })
             .catch(() => {});
         if (prices.status === "rejected" || savedVehicles.status === "rejected")
-          alert(
+          showMessage(
             "Some saved settings could not be loaded. Existing data has been preserved.",
           );
       }
@@ -137,7 +138,7 @@ export default function HomeScreen({ navigation, route }) {
   function selectFuel(type) {
     setFuelType(type);
     savePreferences({ fuelType: type }).catch(() =>
-      alert("Fuel choice applied; saving your preference failed."),
+      showMessage("Fuel choice applied; saving your preference failed."),
     );
   }
   function selectStart(place) {
@@ -164,7 +165,7 @@ export default function HomeScreen({ navigation, route }) {
 
       if (request !== gpsGeneration.current) return;
       if (status !== "granted") {
-        alert("Location permission is required.");
+        showMessage("Location permission is required.");
         return;
       }
 
@@ -177,7 +178,7 @@ export default function HomeScreen({ navigation, route }) {
       if (request === gpsGeneration.current) setStart(currentLocation);
     } catch (error) {
       if (request === gpsGeneration.current)
-        alert("Unable to get current location.");
+        showMessage("Unable to get current location.");
     } finally {
       if (request === gpsGeneration.current) setLoadingLocation(false);
     }
@@ -186,7 +187,7 @@ export default function HomeScreen({ navigation, route }) {
   function applyVehicleAverage(vehicle) {
     setAverage(String(vehicle.averageKmPerLiter));
     savePreferences({ vehicleId: vehicle.id }).catch(() =>
-      alert("Vehicle selected; saving your preference failed."),
+      showMessage("Vehicle selected; saving your preference failed."),
     );
   }
 
@@ -199,26 +200,26 @@ export default function HomeScreen({ navigation, route }) {
     calculatingRef.current = true;
     try {
       if (!manualMode && !start) {
-        alert("Please select starting point.");
+        showMessage("Please select starting point.");
         return;
       }
 
       if (!manualMode && !destination) {
-        alert("Please select destination.");
+        showMessage("Please select destination.");
         return;
       }
 
       const averageNumber = Number(sanitizeAverage(average));
 
       if (!Number.isFinite(averageNumber) || averageNumber <= 0) {
-        alert("Please enter valid vehicle average. Example: 12");
+        showMessage("Please enter valid vehicle average. Example: 12");
         return;
       }
 
       const selectedFuelPrice = Number(fuelPrices?.[fuelType]);
 
       if (!Number.isFinite(selectedFuelPrice) || selectedFuelPrice <= 0) {
-        alert(
+        showMessage(
           "Fuel price is missing or invalid. Please open Fuel Prices screen and save valid prices.",
         );
         return;
@@ -269,7 +270,7 @@ export default function HomeScreen({ navigation, route }) {
       try {
         await saveTrip(tripPayload);
       } catch (error) {
-        alert(
+        showMessage(
           "Estimate calculated, but history was not saved: " + error.message,
         );
       }
@@ -278,7 +279,7 @@ export default function HomeScreen({ navigation, route }) {
         trip: tripPayload,
       });
     } catch (error) {
-      alert(error.message || "Something went wrong.");
+      showMessage(error.message || "Something went wrong.");
     } finally {
       calculatingRef.current = false;
       setCalculating(false);

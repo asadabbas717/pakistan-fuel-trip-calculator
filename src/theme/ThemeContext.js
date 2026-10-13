@@ -49,6 +49,8 @@ export function themeColors(palette = "forest", dark = false) {
     muted: dark ? "#B3C0C7" : "#5C6B74",
     border: dark ? "#38474F" : "#DCE4E3",
     danger: dark ? "#FFA8A8" : "#B42332",
+    dangerSurface: dark ? "#44252C" : "#FEE2E2",
+    dangerBorder: dark ? "#75404A" : "#F4BFC5",
     success: dark ? p.dark : p.light,
     onPrimary: dark ? "#15232A" : "#FFFFFF",
     dark,

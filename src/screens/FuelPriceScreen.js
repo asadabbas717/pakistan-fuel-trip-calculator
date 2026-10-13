@@ -1,14 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Text,
-  TextInput,
-  StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { Text, TextInput, StyleSheet, View, Platform } from "react-native";
 
-import { confirmAction } from "../utils/confirmAction";
+import { confirmAction, showMessage } from "../utils/confirmAction";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -54,7 +47,9 @@ export default function FuelPriceScreen() {
       setDiesel(String(prices.diesel));
       setLastUpdated(prices.lastUpdated || "Available locally");
     } catch (error) {
-      alert("Unable to load fuel prices. Existing data has been preserved.");
+      showMessage(
+        "Unable to load fuel prices. Existing data has been preserved.",
+      );
     } finally {
       setLoading(false);
     }
@@ -76,12 +71,12 @@ export default function FuelPriceScreen() {
       const dieselValue = sanitizeInput(diesel);
 
       if (!isValidNumber(petrolValue)) {
-        alert("Please enter a valid petrol price. Example: 381.78");
+        showMessage("Please enter a valid petrol price. Example: 381.78");
         return;
       }
 
       if (!isValidNumber(dieselValue)) {
-        alert("Please enter a valid diesel price. Example: 388.54");
+        showMessage("Please enter a valid diesel price. Example: 388.54");
         return;
       }
 
@@ -98,9 +93,9 @@ export default function FuelPriceScreen() {
       setLastUpdated(savedPrices.lastUpdated);
       setPriceMode("manual");
 
-      alert("Fuel prices updated successfully.");
+      showMessage("Fuel prices updated successfully.");
     } catch (error) {
-      alert(error.message || "Unable to save fuel prices.");
+      showMessage(error.message || "Unable to save fuel prices.");
     } finally {
       busy.current = false;
       setSaving(false);
@@ -118,7 +113,7 @@ export default function FuelPriceScreen() {
       setPriceMode(prices.mode);
       setLastUpdated(prices.lastUpdated);
     } catch (error) {
-      alert(error.message + " Your saved prices were kept.");
+      showMessage(error.message + " Your saved prices were kept.");
     } finally {
       busy.current = false;
       setSaving(false);
@@ -136,9 +131,9 @@ export default function FuelPriceScreen() {
       setLastUpdated(defaultPrices.lastUpdated);
       setPriceMode("manual");
 
-      alert("Fuel prices reset successfully.");
+      showMessage("Fuel prices reset successfully.");
     } catch (error) {
-      alert("Unable to reset fuel prices.");
+      showMessage("Unable to reset fuel prices.");
     } finally {
       busy.current = false;
       setSaving(false);
@@ -156,11 +151,11 @@ export default function FuelPriceScreen() {
       setDiesel(String(prices.diesel));
       setLastUpdated(prices.lastUpdated);
 
-      alert(
+      showMessage(
         "Manual override removed. Automatic prices will be checked when you return to the calculator.",
       );
     } catch (error) {
-      alert("Unable to refresh fuel price storage.");
+      showMessage("Unable to refresh fuel price storage.");
     } finally {
       busy.current = false;
       setSaving(false);
@@ -168,134 +163,121 @@ export default function FuelPriceScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.keyboardView}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <Screen
-        automaticallyAdjustKeyboardInsets={false}
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
-        <Text style={styles.heading}>Pakistan Fuel Prices</Text>
+    <Screen style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.heading}>Pakistan Fuel Prices</Text>
 
-        <Text style={styles.subheading}>
-          Use verified PSO publications or enter your actual pump prices. These
-          prices are saved locally on your device.
+      <Text style={styles.subheading}>
+        Use verified PSO publications or enter your actual pump prices. These
+        prices are saved locally on your device.
+      </Text>
+
+      <View style={styles.card}>
+        {loading ? (
+          <Text style={styles.loadingText}>Loading fuel prices...</Text>
+        ) : (
+          <>
+            <Text style={styles.label}>Petrol Price / Litre</Text>
+
+            <TextInput
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+              accessibilityLabel="Petrol price per litre"
+              editable={!saving}
+              value={petrol}
+              onChangeText={handlePetrolChange}
+              keyboardType={
+                Platform.OS === "android" ? "numeric" : "decimal-pad"
+              }
+              placeholder="Example: 381.78"
+            />
+
+            <Text style={styles.label}>Diesel Price / Litre</Text>
+
+            <TextInput
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+              accessibilityLabel="Diesel price per litre"
+              editable={!saving}
+              value={diesel}
+              onChangeText={handleDieselChange}
+              keyboardType={
+                Platform.OS === "android" ? "numeric" : "decimal-pad"
+              }
+              placeholder="Example: 388.54"
+            />
+
+            <Text style={styles.noteText}>
+              {priceMode === "manual"
+                ? "Manual override · automatic updates paused"
+                : "Automatic PSO benchmark · your pump price may differ"}
+            </Text>
+            <PrimaryButton
+              title="Use latest PSO prices"
+              variant="outline"
+              disabled={saving}
+              onPress={useOfficialPrices}
+            />
+            <Text style={styles.updatedText}>
+              Last Updated: {lastUpdated || "Not available"}
+            </Text>
+
+            <PrimaryButton
+              title="Save Prices"
+              onPress={handleSave}
+              loading={saving}
+            />
+
+            <PrimaryButton
+              disabled={saving}
+              title="Reset Example Prices"
+              onPress={() =>
+                confirmAction(
+                  "Replace saved fuel prices with example values?",
+                  handleReset,
+                )
+              }
+              variant="outline"
+            />
+
+            <PrimaryButton
+              disabled={saving}
+              title="Remove manual override"
+              onPress={() =>
+                confirmAction(
+                  "Remove your saved manual override and return to automatic prices?",
+                  handleClearAndReload,
+                )
+              }
+              variant="outline"
+            />
+          </>
+        )}
+      </View>
+
+      <View style={styles.noteCard}>
+        <Text style={styles.noteTitle}>Entering prices</Text>
+
+        <Text style={styles.noteText}>
+          Enter a positive price per litre, such as 381.78. Bundled prices are
+          examples and must be checked against your current pump price.
         </Text>
+      </View>
 
-        <View style={styles.card}>
-          {loading ? (
-            <Text style={styles.loadingText}>Loading fuel prices...</Text>
-          ) : (
-            <>
-              <Text style={styles.label}>Petrol Price / Litre</Text>
+      <View style={styles.noteCard}>
+        <Text style={styles.noteTitle}>Important</Text>
 
-              <TextInput
-                placeholderTextColor={colors.muted}
-                style={styles.input}
-                accessibilityLabel="Petrol price per litre"
-                editable={!saving}
-                value={petrol}
-                onChangeText={handlePetrolChange}
-                keyboardType={
-                  Platform.OS === "android" ? "numeric" : "decimal-pad"
-                }
-                placeholder="Example: 381.78"
-              />
-
-              <Text style={styles.label}>Diesel Price / Litre</Text>
-
-              <TextInput
-                placeholderTextColor={colors.muted}
-                style={styles.input}
-                accessibilityLabel="Diesel price per litre"
-                editable={!saving}
-                value={diesel}
-                onChangeText={handleDieselChange}
-                keyboardType={
-                  Platform.OS === "android" ? "numeric" : "decimal-pad"
-                }
-                placeholder="Example: 388.54"
-              />
-
-              <Text style={styles.noteText}>
-                {priceMode === "manual"
-                  ? "Manual override · automatic updates paused"
-                  : "Automatic PSO benchmark · your pump price may differ"}
-              </Text>
-              <PrimaryButton
-                title="Use latest PSO prices"
-                variant="outline"
-                disabled={saving}
-                onPress={useOfficialPrices}
-              />
-              <Text style={styles.updatedText}>
-                Last Updated: {lastUpdated || "Not available"}
-              </Text>
-
-              <PrimaryButton
-                title="Save Prices"
-                onPress={handleSave}
-                loading={saving}
-              />
-
-              <PrimaryButton
-                disabled={saving}
-                title="Reset Example Prices"
-                onPress={() =>
-                  confirmAction(
-                    "Replace saved fuel prices with example values?",
-                    handleReset,
-                  )
-                }
-                variant="outline"
-              />
-
-              <PrimaryButton
-                disabled={saving}
-                title="Remove manual override"
-                onPress={() =>
-                  confirmAction(
-                    "Remove your saved manual override and return to automatic prices?",
-                    handleClearAndReload,
-                  )
-                }
-                variant="outline"
-              />
-            </>
-          )}
-        </View>
-
-        <View style={styles.noteCard}>
-          <Text style={styles.noteTitle}>Entering prices</Text>
-
-          <Text style={styles.noteText}>
-            Enter a positive price per litre, such as 381.78. Bundled prices are
-            examples and must be checked against your current pump price.
-          </Text>
-        </View>
-
-        <View style={styles.noteCard}>
-          <Text style={styles.noteTitle}>Important</Text>
-
-          <Text style={styles.noteText}>
-            Automatic prices come from dated PSO publications. Updates retain
-            the last verified values when unavailable. Save a manual override if
-            your pump charges a different price.
-          </Text>
-        </View>
-      </Screen>
-    </KeyboardAvoidingView>
+        <Text style={styles.noteText}>
+          Automatic prices come from dated PSO publications. Updates retain the
+          last verified values when unavailable. Save a manual override if your
+          pump charges a different price.
+        </Text>
+      </View>
+    </Screen>
   );
 }
 
 const createStyles = (colors) =>
   StyleSheet.create({
-    keyboardView: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
     container: {
       flex: 1,
       backgroundColor: colors.background,

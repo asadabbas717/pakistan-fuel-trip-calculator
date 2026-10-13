@@ -1,5 +1,6 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Platform, ScrollView, StyleSheet } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 
@@ -18,11 +19,14 @@ export default function Screen({
 }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const ScrollComponent =
+    Platform.OS === "web" ? ScrollView : KeyboardAwareScrollView;
   return (
-    <ScrollView
+    <ScrollComponent
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
-      automaticallyAdjustKeyboardInsets
+      {...(Platform.OS !== "web" ? { bottomOffset: 24 } : {})}
+      automaticallyAdjustKeyboardInsets={false}
       {...props}
       style={[styles.screen, { backgroundColor: colors.background }, style]}
       contentContainerStyle={[
@@ -33,7 +37,7 @@ export default function Screen({
       scrollIndicatorInsets={{ bottom: insets.bottom }}
     >
       {children}
-    </ScrollView>
+    </ScrollComponent>
   );
 }
 const styles = StyleSheet.create({

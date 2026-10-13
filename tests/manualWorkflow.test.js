@@ -1,3 +1,5 @@
+jest.mock("../src/utils/confirmAction", () => ({ showMessage: jest.fn() }));
+import { showMessage } from "../src/utils/confirmAction";
 jest.mock("../src/storage/preferencesStorage", () => ({
   getPreferences: jest.fn(async () => ({})),
   savePreferences: jest.fn(async () => ({})),
@@ -53,7 +55,6 @@ import { saveTrip } from "../src/storage/tripStorage";
 let renderer;
 beforeEach(() => {
   jest.clearAllMocks();
-  global.alert = jest.fn();
 });
 afterEach(() => {
   if (renderer) act(() => renderer.unmount());
@@ -116,5 +117,5 @@ test("invalid manual distance never saves or requests a route", async () => {
   expect(saveTrip).not.toHaveBeenCalled();
   expect(getRoute).not.toHaveBeenCalled();
   expect(navigation.navigate).not.toHaveBeenCalled();
-  expect(alert).toHaveBeenCalled();
+  expect(showMessage).toHaveBeenCalled();
 });

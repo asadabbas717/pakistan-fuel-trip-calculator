@@ -9,7 +9,8 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 
 import { getPreferences, savePreferences } from "../storage/preferencesStorage";
-import { confirmAction } from "../utils/confirmAction";
+import { confirmAction, showMessage } from "../utils/confirmAction";
+import DestructiveButton from "../components/DestructiveButton";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -23,6 +24,7 @@ export default function VehicleScreen() {
   const { colors, styles } = useThemedStyles(createStyles);
   const busy = useRef(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [defaultId, setDefaultId] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [name, setName] = useState("");
@@ -40,18 +42,18 @@ export default function VehicleScreen() {
       setVehicles(saved);
       setDefaultId((await getPreferences()).vehicleId || "");
     } catch (error) {
-      alert(error.message);
+      showMessage(error.message);
     }
   }
 
   async function handleSave() {
     if (!name.trim()) {
-      alert("Please enter vehicle name.");
+      showMessage("Please enter vehicle name.");
       return;
     }
 
     if (!Number.isFinite(Number(average)) || Number(average) <= 0) {
-      alert("Please enter valid average.");
+      showMessage("Please enter valid average.");
       return;
     }
 
@@ -68,9 +70,9 @@ export default function VehicleScreen() {
       setName("");
       setAverage("");
 
-      alert("Vehicle saved.");
+      showMessage("Vehicle saved.");
     } catch (error) {
-      alert(error.message);
+      showMessage(error.message);
     } finally {
       busy.current = false;
       setSaving(false);
@@ -78,11 +80,17 @@ export default function VehicleScreen() {
   }
 
   async function handleDelete(id) {
+    if (busy.current) return;
+    busy.current = true;
+    setDeleting(true);
     try {
       const updated = await deleteVehicle(id);
       setVehicles(updated);
     } catch (error) {
-      alert(error.message);
+      showMessage(error.message);
+    } finally {
+      busy.current = false;
+      setDeleting(false);
     }
   }
 
@@ -118,6 +126,7 @@ export default function VehicleScreen() {
         <PrimaryButton
           title="Save Vehicle"
           loading={saving}
+          disabled={deleting}
           onPress={handleSave}
         />
       </View>
@@ -137,7 +146,7 @@ export default function VehicleScreen() {
                   await savePreferences({ vehicleId: vehicle.id });
                   setDefaultId(vehicle.id);
                 } catch (error) {
-                  alert(error.message);
+                  showMessage(error.message);
                 }
               }}
             >
@@ -152,18 +161,15 @@ export default function VehicleScreen() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.deleteButton}
-            accessibilityRole="button"
+          <DestructiveButton
+            disabled={saving || deleting}
             accessibilityLabel={"Delete " + vehicle.name}
             onPress={() =>
               confirmAction("Delete " + vehicle.name + "?", () =>
                 handleDelete(vehicle.id),
               )
             }
-          >
-            <Text style={styles.deleteText}>Delete</Text>
-          </TouchableOpacity>
+          />
         </View>
       ))}
     </Screen>
@@ -236,15 +242,5 @@ const createStyles = (colors) =>
     vehicleAverage: {
       color: colors.muted,
       marginTop: 4,
-    },
-    deleteButton: {
-      backgroundColor: "#FEE2E2",
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 12,
-    },
-    deleteText: {
-      color: colors.danger,
-      fontWeight: "800",
     },
   });

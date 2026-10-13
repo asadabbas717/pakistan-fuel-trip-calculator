@@ -1,3 +1,4 @@
+import { showMessage } from "../utils/confirmAction";
 import React, { useRef, useState } from "react";
 import { Text, StyleSheet, Linking, Platform } from "react-native";
 
@@ -29,7 +30,7 @@ export default function ResultScreen({ route, navigation }) {
     try {
       await action();
     } catch (error) {
-      alert(error.message || "Unable to export this trip.");
+      showMessage(error.message || "Unable to export this trip.");
     } finally {
       busyRef.current = false;
       setSharing(false);
@@ -39,7 +40,7 @@ export default function ResultScreen({ route, navigation }) {
     try {
       await Linking.openURL(directionsUrl(trip));
     } catch (error) {
-      alert(error.message || "Unable to open your navigation app.");
+      showMessage(error.message || "Unable to open your navigation app.");
     }
   }
   return (

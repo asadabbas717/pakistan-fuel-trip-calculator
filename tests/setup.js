@@ -4,3 +4,12 @@ Object.defineProperty(globalThis, "fetch", {
   writable: true,
   value: jest.fn(),
 });
+
+jest.mock("react-native-keyboard-controller", () => {
+  const React = require("react");
+  const { ScrollView } = require("react-native");
+  return {
+    KeyboardAwareScrollView: (props) => React.createElement(ScrollView, props),
+    KeyboardProvider: ({ children }) => children,
+  };
+});

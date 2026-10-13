@@ -1,5 +1,6 @@
 jest.mock("react-native", () => ({
   ScrollView: "ScrollView",
+  Platform: { OS: "android" },
   StyleSheet: { create: (s) => s },
   useColorScheme: () => "dark",
   AccessibilityInfo: {
@@ -16,9 +17,14 @@ jest.mock("../src/storage/appStorage", () => ({
 }));
 import React from "react";
 import { create, act } from "react-test-renderer";
-import { ScrollView } from "react-native";
+import { Platform, ScrollView } from "react-native";
 import Screen, { screenPadding } from "../src/components/Screen";
-import { ThemeProvider, useTheme } from "../src/theme/ThemeContext";
+import {
+  ThemeProvider,
+  useTheme,
+  themeColors,
+  palettes,
+} from "../src/theme/ThemeContext";
 import { getStoredItem, setStoredItem } from "../src/storage/appStorage";
 let renderer;
 let current;
@@ -29,6 +35,7 @@ function Probe() {
 beforeEach(() => {
   global.IS_REACT_ACT_ENVIRONMENT = true;
   jest.clearAllMocks();
+  Platform.OS = "android";
 });
 afterEach(() => {
   if (renderer) act(() => renderer.unmount());
@@ -96,4 +103,41 @@ test("failed persistence leaves the chosen theme usable with an honest error", a
   });
   expect(current.colors.dark).toBe(false);
   expect(current.error).toContain("saving failed");
+});
+
+function luminance(hex) {
+  const rgb = hex
+    .slice(1)
+    .match(/../g)
+    .map((part) => parseInt(part, 16) / 255)
+    .map((value) =>
+      value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
+    );
+  return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+}
+test("destructive text remains readable in every palette and appearance", () => {
+  for (const palette of Object.keys(palettes))
+    for (const dark of [false, true]) {
+      const colors = themeColors(palette, dark);
+      const values = [
+        luminance(colors.danger),
+        luminance(colors.dangerSurface),
+      ].sort((a, b) => b - a);
+      expect((values[0] + 0.05) / (values[1] + 0.05)).toBeGreaterThanOrEqual(
+        4.5,
+      );
+    }
+});
+test("native forms use focus-aware scrolling without duplicate keyboard insets; web retains ordinary scrolling", async () => {
+  await act(async () => {
+    renderer = create(<Screen />);
+  });
+  let props = renderer.root.findByType(ScrollView).props;
+  expect(props.bottomOffset).toBe(24);
+  expect(props.automaticallyAdjustKeyboardInsets).toBe(false);
+  Platform.OS = "web";
+  act(() => renderer.update(<Screen />));
+  props = renderer.root.findByType(ScrollView).props;
+  expect(props.bottomOffset).toBeUndefined();
+  expect(props.keyboardShouldPersistTaps).toBe("handled");
 });

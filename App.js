@@ -1,4 +1,6 @@
 import React from "react";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import DialogHost from "./src/components/DialogHost";
 import AppErrorBoundary from "./src/components/AppErrorBoundary";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -9,7 +11,10 @@ export default function App() {
     <AppErrorBoundary>
       <SafeAreaProvider>
         <ThemeProvider>
-          <AppNavigator />
+          <KeyboardProvider preload={false}>
+            <AppNavigator />
+            <DialogHost />
+          </KeyboardProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </AppErrorBoundary>

@@ -45,6 +45,8 @@ export default function DialogHost() {
     <Modal
       visible={!!dialog}
       transparent
+      statusBarTranslucent
+      navigationBarTranslucent
       animationType="none"
       onRequestClose={close}
       onShow={() => {

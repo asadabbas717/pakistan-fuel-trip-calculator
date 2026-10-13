@@ -25,7 +25,8 @@
           "backgroundColor": "#F7FAF7"
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      ["expo-navigation-bar", { "enforceContrast": false, "hidden": false }]
     ]
   }
 }

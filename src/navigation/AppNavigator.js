@@ -4,7 +4,7 @@ import {
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
-import { StatusBar, Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import HomeScreen from "../screens/HomeScreen";
@@ -34,10 +34,11 @@ export default function AppNavigator() {
         },
       }}
     >
-      <StatusBar barStyle={colors.dark ? "light-content" : "dark-content"} />
       <Stack.Navigator
         initialRouteName="Home"
         screenOptions={({ navigation }) => ({
+          statusBarStyle: colors.dark ? "light" : "dark",
+          statusBarHidden: false,
           animation: reduceMotion ? "none" : "slide_from_right",
           headerShadowVisible: false,
           headerRight: () => (

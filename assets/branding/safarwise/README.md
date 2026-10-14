@@ -9,7 +9,7 @@ Generated raster artwork for the SafarWise identity, integrated into the applica
 
 Suggested brand palette: midnight teal `#102E32`, mint `#80DFC1`, warm gold `#E8BE67`, ivory `#F2F7F5`.
 
-Runtime assets are `launcher.png` (1024 square), `favicon.png` (64 square), `wordmark-light.png` and `wordmark-dark.png` (652 by 217), and `journey.jpg` (960 by 640, about 139 KB). Original PNG artwork remains available above. The header uses the transparent dark wordmark on light surfaces and the ivory wordmark on its own teal plate in dark mode, across all three palettes. The landscape sits below accessible live headings, never behind body text.
+Runtime assets are `launcher.png` (1024 square), `favicon.png` (64 square), `wordmark-light.png` (652 by 217), and `journey.jpg` (960 by 640, about 139 KB). Original PNG artwork remains available above. The header uses the transparent dark wordmark on light surfaces and the same transparent artwork tinted with the theme text color in dark mode, across all three palettes; the boxed dark logo remains a standalone promotional asset. The landscape sits below accessible live headings, never behind body text.
 
 These are raster assets, not vector master files. The full-bleed launcher uses the standard Expo icon pipeline; it is not a transparent Android adaptive foreground. Native splash variants follow the device appearance; the in-app header follows the user's saved appearance. Launcher and splash changes require a new native build and device verification.
 

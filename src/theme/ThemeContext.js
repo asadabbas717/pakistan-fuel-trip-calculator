@@ -41,6 +41,23 @@ export function themeColors(palette = "forest", dark = false) {
     : palettes.forest;
   return {
     primary: dark ? p.dark : p.light,
+    hero:
+      palette === "ocean"
+        ? "#1C2A4D"
+        : palette === "sunset"
+          ? "#492B27"
+          : "#123C32",
+    heroBorder:
+      palette === "ocean"
+        ? "#34446C"
+        : palette === "sunset"
+          ? "#68443A"
+          : "#29594B",
+    heroText: "#F4F8F4",
+    heroMuted: "#C6D5D4",
+    heroAccent: p.dark,
+    input: dark ? "#172229" : "#F7F9F6",
+    softBorder: dark ? "#2C3D45" : "#E6ECE7",
     primaryLight: dark ? p.night : p.tint,
     secondary: p.accent,
     background: dark ? "#111A20" : "#F5F6F2",

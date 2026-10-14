@@ -40,6 +40,10 @@ export default function AppNavigator() {
           statusBarStyle: colors.dark ? "light" : "dark",
           statusBarHidden: false,
           animation: reduceMotion ? "none" : "slide_from_right",
+          animationTypeForReplace: "pop",
+          animationMatchesGesture: true,
+          animationDuration: 280,
+          gestureEnabled: true,
           headerShadowVisible: false,
           headerRight: () => (
             <TouchableOpacity

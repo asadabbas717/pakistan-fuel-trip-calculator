@@ -13,6 +13,7 @@ import {
 import * as Location from "expo-location";
 import { useFocusEffect } from "@react-navigation/native";
 
+import MotionPressable from "../components/MotionPressable";
 import JourneyHero from "../components/JourneyHero";
 import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
@@ -290,29 +291,30 @@ export default function HomeScreen({ navigation, route }) {
     <Screen style={styles.container} contentContainerStyle={styles.content}>
       <JourneyHero />
       <View style={styles.quickActions}>
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.quickButton}
-          onPress={() => navigation.navigate("FuelPrices")}
-        >
-          <Text style={styles.quickButtonText}>Fuel Prices</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.quickButton}
-          onPress={() => navigation.navigate("Vehicles")}
-        >
-          <Text style={styles.quickButtonText}>Vehicles</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.quickButton}
-          onPress={() => navigation.navigate("History")}
-        >
-          <Text style={styles.quickButtonText}>History</Text>
-        </TouchableOpacity>
+        {[
+          ["FuelPrices", "Fuel Prices", "At the pump", "↗"],
+          ["Vehicles", "Vehicles", "Your garage", "▱"],
+          ["History", "History", "Past journeys", "↺"],
+        ].map(([screen, title, caption, icon]) => (
+          <MotionPressable
+            key={screen}
+            containerStyle={styles.quickItem}
+            style={styles.quickButton}
+            accessibilityRole="button"
+            accessibilityLabel={title}
+            onPress={() => navigation.navigate(screen)}
+          >
+            <Text
+              accessibilityElementsHidden
+              importantForAccessibility="no"
+              style={styles.quickIcon}
+            >
+              {icon}
+            </Text>
+            <Text style={styles.quickButtonText}>{title}</Text>
+            <Text style={styles.quickCaption}>{caption}</Text>
+          </MotionPressable>
+        ))}
       </View>
 
       <Reveal delay={100} style={styles.card}>
@@ -326,6 +328,9 @@ export default function HomeScreen({ navigation, route }) {
           {fuelPrices.lastUpdated}
         </Text>
 
+        <Text style={[styles.step, styles.sectionDivider]}>
+          02 / MAP OUT YOUR ROUTE
+        </Text>
         <View style={styles.switchRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>Enter distance manually</Text>
@@ -336,6 +341,8 @@ export default function HomeScreen({ navigation, route }) {
           <Switch
             accessibilityLabel="Enter distance manually"
             disabled={calculating}
+            trackColor={{ false: colors.border, true: colors.primaryLight }}
+            thumbColor={manualMode ? colors.primary : colors.muted}
             value={manualMode}
             onValueChange={setManualMode}
           />
@@ -444,6 +451,9 @@ export default function HomeScreen({ navigation, route }) {
             ))}
           </View>
         )}
+        <Text style={[styles.step, styles.sectionDivider]}>
+          03 / MAKE IT YOUR DRIVE
+        </Text>
         <Text style={styles.label}>Vehicle Average km/litre</Text>
 
         <TextInput
@@ -494,7 +504,7 @@ export default function HomeScreen({ navigation, route }) {
             accessibilityLabel="Return trip"
             value={isReturnTrip}
             onValueChange={setIsReturnTrip}
-            trackColor={{ false: "#D1D5DB", true: "#A5D6A7" }}
+            trackColor={{ false: colors.border, true: colors.primaryLight }}
             thumbColor={isReturnTrip ? colors.primary : "#F3F4F6"}
           />
         </View>
@@ -518,6 +528,21 @@ export default function HomeScreen({ navigation, route }) {
 
 const createStyles = (colors) =>
   StyleSheet.create({
+    sectionDivider: {
+      marginTop: 28,
+      paddingTop: 24,
+      borderTopWidth: 1,
+      borderTopColor: colors.softBorder,
+      marginBottom: 10,
+    },
+    quickItem: { flex: 1, minWidth: 0 },
+    quickIcon: {
+      fontSize: 25,
+      color: colors.primary,
+      marginBottom: 12,
+      fontWeight: "700",
+    },
+    quickCaption: { color: colors.muted, fontSize: 10, marginTop: 4 },
     step: {
       fontSize: 10,
       letterSpacing: 2,
@@ -547,26 +572,29 @@ const createStyles = (colors) =>
     quickActions: {
       flexDirection: "row",
       gap: 8,
-      marginBottom: 10,
+      marginBottom: 20,
     },
     quickButton: {
-      minHeight: 48,
-      justifyContent: "center",
       flex: 1,
-      backgroundColor: colors.primaryLight,
-      borderRadius: 12,
-      paddingVertical: 10,
-      alignItems: "center",
+      minHeight: 112,
+      justifyContent: "center",
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 20,
+      paddingVertical: 16,
+      paddingHorizontal: 12,
+      alignItems: "flex-start",
     },
     quickButtonText: {
       color: colors.primary,
       fontWeight: "800",
-      fontSize: 12,
+      fontSize: 13,
     },
     card: {
       backgroundColor: colors.card,
       borderRadius: 26,
-      padding: 16,
+      padding: 20,
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -586,12 +614,12 @@ const createStyles = (colors) =>
       marginBottom: 8,
     },
     input: {
-      backgroundColor: colors.card,
+      backgroundColor: colors.input,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 16,
       paddingHorizontal: 12,
-      height: 52,
+      minHeight: 56,
       fontSize: 16,
       color: colors.text,
     },
@@ -639,6 +667,6 @@ const createStyles = (colors) =>
       fontSize: 12,
       marginTop: 14,
       lineHeight: 18,
-      textAlign: "center",
+      textAlign: "left",
     },
   });

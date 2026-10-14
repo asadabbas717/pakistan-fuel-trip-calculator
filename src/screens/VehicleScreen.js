@@ -11,6 +11,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getPreferences, savePreferences } from "../storage/preferencesStorage";
 import { confirmAction, showMessage } from "../utils/confirmAction";
 import DestructiveButton from "../components/DestructiveButton";
+import SectionHeading from "../components/SectionHeading";
+import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -96,12 +98,14 @@ export default function VehicleScreen() {
 
   return (
     <Screen style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Saved Vehicles</Text>
-      <Text style={styles.subheading}>
-        Save your car/bike average to quickly calculate future trip costs.
-      </Text>
+      <SectionHeading
+        eyebrow="YOUR GARAGE"
+        title={"Every ride.\nReady to go."}
+        subtitle="Save your car or bike’s average. Your next estimate is just a tap away."
+      />
 
-      <View style={styles.card}>
+      <Reveal delay={80} style={styles.card}>
+        <Text style={styles.formEyebrow}>ADD YOUR EVERYDAY RIDE</Text>
         <Text style={styles.label}>Vehicle Name</Text>
         <TextInput
           placeholderTextColor={colors.muted}
@@ -129,13 +133,20 @@ export default function VehicleScreen() {
           disabled={deleting}
           onPress={handleSave}
         />
-      </View>
+      </Reveal>
 
       <Text style={styles.sectionTitle}>My Vehicles</Text>
 
-      {vehicles.map((vehicle) => (
-        <View key={vehicle.id} style={styles.vehicleCard}>
-          <View>
+      {vehicles.map((vehicle, index) => (
+        <Reveal
+          key={vehicle.id}
+          delay={Math.min(index * 40, 160)}
+          style={styles.vehicleCard}
+        >
+          <View style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
+            <Text style={styles.vehicleIndex}>
+              RIDE / {String(index + 1).padStart(2, "0")}
+            </Text>
             <Text style={styles.vehicleName}>{vehicle.name}</Text>
             <TouchableOpacity
               accessibilityRole="button"
@@ -170,7 +181,7 @@ export default function VehicleScreen() {
               )
             }
           />
-        </View>
+        </Reveal>
       ))}
     </Screen>
   );
@@ -197,7 +208,7 @@ const createStyles = (colors) =>
     },
     card: {
       backgroundColor: colors.card,
-      padding: 16,
+      padding: 20,
       borderRadius: 26,
       borderWidth: 1,
       borderColor: colors.border,
@@ -208,11 +219,27 @@ const createStyles = (colors) =>
       marginTop: 12,
       marginBottom: 8,
     },
+    vehicleIndex: {
+      color: colors.primary,
+      fontSize: 10,
+      letterSpacing: 1.5,
+      fontWeight: "800",
+      marginBottom: 10,
+    },
+    formEyebrow: {
+      color: colors.primary,
+      fontSize: 10,
+      letterSpacing: 1.5,
+      fontWeight: "800",
+      marginBottom: 8,
+    },
     input: {
-      height: 52,
+      color: colors.text,
+      backgroundColor: colors.input,
+      minHeight: 56,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 16,
       paddingHorizontal: 12,
       fontSize: 16,
     },
@@ -225,7 +252,7 @@ const createStyles = (colors) =>
     },
     vehicleCard: {
       backgroundColor: colors.card,
-      padding: 16,
+      padding: 20,
       borderRadius: 26,
       borderWidth: 1,
       borderColor: colors.border,

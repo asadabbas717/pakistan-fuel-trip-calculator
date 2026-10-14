@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Reveal from "./Reveal";
+import RouteArtwork from "./RouteArtwork";
 import { useThemedStyles } from "../theme/ThemeContext";
-
 export default function JourneyHero({
-  eyebrow = "LESS GUESSWORK. MORE ADVENTURE.",
-  title = "Every journey\nstarts with a plan.",
-  subtitle = "Find your route. Know your fuel. Enjoy the drive.",
+  eyebrow = "THE ROAD IS CALLING",
+  title = "Go places.\nSpend smarter.",
+  subtitle = "Your route, your fuel, your next adventure. All in one place.",
 }) {
   const { styles } = useThemedStyles(createStyles);
   return (
@@ -17,82 +17,78 @@ export default function JourneyHero({
         importantForAccessibility="no-hide-descendants"
         style={styles.orbit}
       />
-      <Text style={styles.eyebrow}>{eyebrow}</Text>
+      <View style={styles.topline}>
+        <Text style={styles.eyebrow}>{eyebrow}</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>PK ↗</Text>
+        </View>
+      </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
-      <View style={styles.route}>
-        <View style={styles.dot} />
-        <View style={styles.line} />
-        <Text style={styles.arrow}>→</Text>
-        <View style={styles.line} />
-        <View style={styles.end} />
-        <Text style={styles.routeText}>YOUR NEXT CHAPTER</Text>
-      </View>
+      <RouteArtwork />
     </Reveal>
   );
 }
 const createStyles = (c) =>
   StyleSheet.create({
     hero: {
-      backgroundColor: c.primaryLight,
+      backgroundColor: c.hero,
       borderRadius: 30,
-      padding: 26,
-      marginBottom: 20,
+      padding: 24,
+      marginBottom: 18,
       overflow: "hidden",
+      borderWidth: 1,
+      borderColor: c.heroBorder,
     },
     orbit: {
       position: "absolute",
-      width: 190,
-      height: 190,
-      borderRadius: 95,
-      borderWidth: 30,
-      borderColor: c.secondary,
-      opacity: 0.16,
-      right: -75,
-      top: -55,
+      width: 220,
+      height: 220,
+      borderRadius: 110,
+      borderWidth: 38,
+      borderColor: c.heroAccent,
+      opacity: 0.045,
+      right: -70,
+      top: -80,
     },
-    eyebrow: {
-      color: c.primary,
-      fontWeight: "800",
-      letterSpacing: 2,
-      fontSize: 10,
-    },
-    title: {
-      fontSize: 34,
-      lineHeight: 40,
-      fontWeight: "900",
-      color: c.text,
-      marginTop: 18,
-      letterSpacing: -1,
-    },
-    subtitle: {
-      color: c.muted,
-      fontSize: 14,
-      lineHeight: 22,
-      marginTop: 12,
-      maxWidth: 290,
-    },
-    route: {
+    topline: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
-      marginTop: 24,
+      justifyContent: "space-between",
+      gap: 12,
     },
-    dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: c.primary },
-    end: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      borderWidth: 3,
-      borderColor: c.primary,
-    },
-    line: { width: 22, height: 1, backgroundColor: c.primary },
-    arrow: { color: c.primary },
-    routeText: {
-      fontSize: 9,
+    eyebrow: {
+      color: c.heroAccent,
+      fontSize: 10,
+      letterSpacing: 2,
       fontWeight: "800",
+      flexShrink: 1,
+    },
+    badge: {
+      paddingVertical: 7,
+      paddingHorizontal: 10,
+      borderRadius: 30,
+      backgroundColor: c.heroBorder,
+    },
+    badgeText: {
+      color: c.heroAccent,
+      fontWeight: "800",
+      fontSize: 10,
       letterSpacing: 1,
-      color: c.primary,
-      marginLeft: 6,
+    },
+    title: {
+      fontSize: 39,
+      lineHeight: 44,
+      fontWeight: "900",
+      color: c.heroText,
+      marginTop: 22,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      color: c.heroMuted,
+      fontSize: 14,
+      lineHeight: 23,
+      marginTop: 14,
+      maxWidth: 390,
     },
   });

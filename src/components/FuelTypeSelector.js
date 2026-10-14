@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import MotionPressable from "./MotionPressable";
 import { useThemedStyles } from "../theme/ThemeContext";
 
 export default function FuelTypeSelector({ selectedFuel, onChange }) {
@@ -9,7 +10,8 @@ export default function FuelTypeSelector({ selectedFuel, onChange }) {
       <Text style={styles.label}>Fuel Type</Text>
 
       <View style={styles.row}>
-        <TouchableOpacity
+        <MotionPressable
+          containerStyle={{ flex: 1 }}
           style={[styles.option, selectedFuel === "petrol" && styles.active]}
           accessibilityRole="radio"
           accessibilityState={{ checked: selectedFuel === "petrol" }}
@@ -21,11 +23,12 @@ export default function FuelTypeSelector({ selectedFuel, onChange }) {
               selectedFuel === "petrol" && styles.activeText,
             ]}
           >
-            Petrol
+            {selectedFuel === "petrol" ? "Petrol  ✓" : "Petrol"}
           </Text>
-        </TouchableOpacity>
+        </MotionPressable>
 
-        <TouchableOpacity
+        <MotionPressable
+          containerStyle={{ flex: 1 }}
           style={[styles.option, selectedFuel === "diesel" && styles.active]}
           accessibilityRole="radio"
           accessibilityState={{ checked: selectedFuel === "diesel" }}
@@ -37,9 +40,9 @@ export default function FuelTypeSelector({ selectedFuel, onChange }) {
               selectedFuel === "diesel" && styles.activeText,
             ]}
           >
-            Diesel
+            {selectedFuel === "diesel" ? "Diesel  ✓" : "Diesel"}
           </Text>
-        </TouchableOpacity>
+        </MotionPressable>
       </View>
     </View>
   );
@@ -61,11 +64,11 @@ const createStyles = (colors) =>
       gap: 10,
     },
     option: {
-      flex: 1,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
-      paddingVertical: 13,
+      paddingVertical: 17,
+      minHeight: 58,
       borderRadius: 14,
       alignItems: "center",
     },

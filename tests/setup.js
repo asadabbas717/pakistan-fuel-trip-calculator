@@ -13,3 +13,17 @@ jest.mock("react-native-keyboard-controller", () => {
     KeyboardProvider: ({ children }) => children,
   };
 });
+
+jest.mock("../src/components/MotionPressable", () => {
+  const React = require("react");
+  const { TouchableOpacity } = require("react-native");
+  return ({ children, ...props }) =>
+    React.createElement(TouchableOpacity, props, children);
+});
+jest.mock("../src/components/RouteArtwork", () => () => null);
+jest.mock(
+  "../src/components/PageTransition",
+  () =>
+    ({ children }) =>
+      children,
+);

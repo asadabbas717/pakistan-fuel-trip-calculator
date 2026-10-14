@@ -10,12 +10,16 @@ export default function CostSummaryCard({ result, fuelType, fuelPrice }) {
 
   return (
     <Reveal delay={120} style={styles.card}>
-      <Text style={styles.budgetLabel}>YOUR FUEL BUDGET</Text>
+      <View style={styles.budgetTopline}>
+        <Text style={styles.budgetLabel}>YOUR FUEL BUDGET</Text>
+        <Text style={styles.budgetBadge}>ESTIMATE ↗</Text>
+      </View>
       <Text style={styles.budget}>{formatPKR(result.totalCost)}</Text>
       <Text style={styles.budgetHint}>
         Estimated fuel cost · excludes tolls
       </Text>
-      <Text style={styles.title}>Trip Cost Summary</Text>
+      <View style={styles.budgetRule} />
+      <Text style={styles.title}>The numbers behind your trip</Text>
 
       <View style={styles.row}>
         <Text style={styles.label}>Distance</Text>
@@ -46,32 +50,55 @@ export default function CostSummaryCard({ result, fuelType, fuelPrice }) {
 
 const createStyles = (colors) =>
   StyleSheet.create({
+    budgetTopline: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 12,
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    budgetBadge: {
+      color: colors.heroAccent,
+      backgroundColor: colors.heroBorder,
+      paddingVertical: 7,
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      fontSize: 9,
+      letterSpacing: 1,
+      fontWeight: "800",
+    },
+    budgetRule: {
+      height: 1,
+      backgroundColor: colors.heroBorder,
+      marginBottom: 22,
+    },
     budgetLabel: {
-      color: colors.primary,
+      color: colors.heroAccent,
       fontSize: 10,
       letterSpacing: 2,
       fontWeight: "800",
     },
     budget: {
-      color: colors.primary,
-      fontSize: 34,
+      color: colors.heroAccent,
+      fontSize: 38,
+      fontVariant: ["tabular-nums"],
       fontWeight: "900",
       marginVertical: 12,
       letterSpacing: -1,
     },
-    budgetHint: { color: colors.muted, fontSize: 12, marginBottom: 24 },
+    budgetHint: { color: colors.heroMuted, fontSize: 12, marginBottom: 24 },
     card: {
-      backgroundColor: colors.card,
+      backgroundColor: colors.hero,
       borderRadius: 26,
-      padding: 18,
+      padding: 24,
       marginVertical: 10,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.heroBorder,
     },
     title: {
       fontSize: 18,
       fontWeight: "800",
-      color: colors.text,
+      color: colors.heroText,
       marginBottom: 14,
     },
     row: {
@@ -82,11 +109,11 @@ const createStyles = (colors) =>
       marginVertical: 7,
     },
     label: {
-      color: colors.muted,
+      color: colors.heroMuted,
       fontSize: 14,
     },
     value: {
-      color: colors.text,
+      color: colors.heroText,
       fontSize: 14,
       fontWeight: "700",
       maxWidth: "55%",
@@ -94,7 +121,7 @@ const createStyles = (colors) =>
     },
     divider: {
       height: 1,
-      backgroundColor: colors.border,
+      backgroundColor: colors.heroBorder,
       marginVertical: 12,
     },
     totalRow: {
@@ -104,7 +131,7 @@ const createStyles = (colors) =>
     },
     totalLabel: {
       fontSize: 17,
-      color: colors.text,
+      color: colors.heroText,
       fontWeight: "800",
     },
     totalValue: {

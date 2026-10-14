@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import MotionPressable from "../components/MotionPressable";
 import Screen from "../components/Screen";
 import Reveal from "../components/Reveal";
 import { palettes, useTheme, useThemedStyles } from "../theme/ThemeContext";
@@ -10,17 +11,16 @@ export default function AppearanceScreen() {
   return (
     <Screen>
       <Text style={styles.eyebrow}>MAKE IT YOURS</Text>
-      <Text style={styles.title}>
-        {"A different mood.\nThe same adventure."}
-      </Text>
+      <Text style={styles.title}>{"Find your\ntravel mood."}</Text>
       <Text style={styles.subtitle}>
         Your colours follow you across every screen.
       </Text>
       <Text style={styles.label}>Display mode</Text>
       <View style={styles.modes}>
         {["system", "light", "dark"].map((item) => (
-          <TouchableOpacity
+          <MotionPressable
             key={item}
+            containerStyle={{ flex: 1 }}
             accessibilityRole="radio"
             accessibilityState={{ checked: mode === item }}
             onPress={() => update({ mode: item })}
@@ -33,19 +33,56 @@ export default function AppearanceScreen() {
                   ? "Light"
                   : "Dark"}
             </Text>
-          </TouchableOpacity>
+          </MotionPressable>
         ))}
       </View>
       <Text style={styles.label}>Colour story</Text>
       {Object.entries(palettes).map(([key, p], i) => (
         <Reveal key={key} delay={i * 60}>
-          <TouchableOpacity
+          <MotionPressable
             accessibilityRole="radio"
             accessibilityState={{ checked: palette === key }}
             accessibilityLabel={p.name}
             onPress={() => update({ palette: key })}
             style={[styles.choice, palette === key && styles.selected]}
           >
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.preview, { backgroundColor: p.tint }]}
+            >
+              <View style={[styles.previewHero, { backgroundColor: p.light }]}>
+                <View
+                  style={[
+                    styles.previewLine,
+                    { backgroundColor: p.dark, width: "45%" },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.previewLine,
+                    { backgroundColor: "#FFFFFF", width: "70%", height: 10 },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.previewLine,
+                    { backgroundColor: p.accent, width: "25%" },
+                  ]}
+                />
+              </View>
+              <View style={styles.previewTiles}>
+                {[0, 1, 2].map((n) => (
+                  <View
+                    key={n}
+                    style={[
+                      styles.previewTile,
+                      { backgroundColor: p.light, opacity: 0.15 + n * 0.08 },
+                    ]}
+                  />
+                ))}
+              </View>
+            </View>
             <View style={styles.swatches}>
               {[p.light, p.dark, p.accent].map((colour) => (
                 <View
@@ -58,7 +95,7 @@ export default function AppearanceScreen() {
             <Text style={styles.check}>
               {palette === key ? "Selected ✓" : "Try it →"}
             </Text>
-          </TouchableOpacity>
+          </MotionPressable>
         </Reveal>
       ))}
       {!!error && (
@@ -91,7 +128,6 @@ const createStyles = (c) =>
     label: { color: c.text, fontWeight: "800", marginVertical: 14 },
     modes: { flexDirection: "row", gap: 8 },
     mode: {
-      flex: 1,
       paddingVertical: 16,
       borderRadius: 16,
       backgroundColor: c.card,
@@ -109,8 +145,13 @@ const createStyles = (c) =>
       marginBottom: 12,
     },
     selected: { borderColor: c.primary },
+    preview: { padding: 12, borderRadius: 16, marginBottom: 20 },
+    previewHero: { padding: 18, borderRadius: 12, gap: 8 },
+    previewLine: { height: 5, borderRadius: 4 },
+    previewTiles: { flexDirection: "row", gap: 8, marginTop: 8 },
+    previewTile: { flex: 1, height: 20, borderRadius: 6 },
     swatches: { flexDirection: "row", marginBottom: 16, gap: 8 },
-    swatch: { width: 38, height: 38, borderRadius: 19 },
+    swatch: { width: 22, height: 22, borderRadius: 11 },
     name: { color: c.text, fontSize: 18, fontWeight: "800" },
     check: { color: c.primary, marginTop: 8, fontWeight: "700" },
   });

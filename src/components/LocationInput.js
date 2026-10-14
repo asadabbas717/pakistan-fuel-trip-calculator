@@ -12,6 +12,7 @@ import { searchPlace } from "../services/geocodingService";
 
 export default function LocationInput({ label, placeholder, value, onSelect }) {
   const { colors, styles } = useThemedStyles(createStyles);
+  const [focused, setFocused] = useState(false);
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState([]);
@@ -88,7 +89,15 @@ export default function LocationInput({ label, placeholder, value, onSelect }) {
 
       <View style={styles.searchRow}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            focused && {
+              borderColor: colors.primary,
+              backgroundColor: colors.card,
+            },
+          ]}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder={placeholder}
           value={query}
           accessibilityLabel={label}
@@ -151,12 +160,12 @@ const createStyles = (colors) =>
     },
     input: {
       flex: 1,
-      minHeight: 52,
+      minHeight: 56,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
-      backgroundColor: colors.card,
-      paddingHorizontal: 12,
+      borderRadius: 16,
+      backgroundColor: colors.input,
+      paddingHorizontal: 16,
       paddingVertical: 10,
       color: colors.text,
     },

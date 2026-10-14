@@ -1,4 +1,5 @@
 import React from "react";
+import PageTransition from "./PageTransition";
 import { Platform, ScrollView, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,22 +23,24 @@ export default function Screen({
   const ScrollComponent =
     Platform.OS === "web" ? ScrollView : KeyboardAwareScrollView;
   return (
-    <ScrollComponent
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-      {...(Platform.OS !== "web" ? { bottomOffset: 24 } : {})}
-      automaticallyAdjustKeyboardInsets={false}
-      {...props}
-      style={[styles.screen, { backgroundColor: colors.background }, style]}
-      contentContainerStyle={[
-        styles.content,
-        contentContainerStyle,
-        screenPadding(insets),
-      ]}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
-    >
-      {children}
-    </ScrollComponent>
+    <PageTransition>
+      <ScrollComponent
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        {...(Platform.OS !== "web" ? { bottomOffset: 24 } : {})}
+        automaticallyAdjustKeyboardInsets={false}
+        {...props}
+        style={[styles.screen, { backgroundColor: colors.background }, style]}
+        contentContainerStyle={[
+          styles.content,
+          contentContainerStyle,
+          screenPadding(insets),
+        ]}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+      >
+        {children}
+      </ScrollComponent>
+    </PageTransition>
   );
 }
 const styles = StyleSheet.create({

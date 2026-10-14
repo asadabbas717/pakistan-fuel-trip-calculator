@@ -9,6 +9,8 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { confirmAction, showMessage } from "../utils/confirmAction";
 import DestructiveButton from "../components/DestructiveButton";
+import SectionHeading from "../components/SectionHeading";
+import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -97,10 +99,11 @@ export default function HistoryScreen({ navigation }) {
   }
   return (
     <Screen style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Your journeys</Text>
-      <Text style={styles.subheading}>
-        Your latest 25 trips, ready to revisit.
-      </Text>
+      <SectionHeading
+        eyebrow="THE JOURNEY LOG"
+        title={"Good trips.\nWorth keeping."}
+        subtitle="Your latest 25 journeys, ready to revisit, plan again or take with you."
+      />
       <TextInput
         accessibilityLabel="Search trip history"
         placeholder="Search by starting point or destination"
@@ -118,8 +121,20 @@ export default function HistoryScreen({ navigation }) {
           </Text>
         </View>
       )}
-      {filtered.map((trip) => (
-        <View key={trip.id} style={styles.card}>
+      {filtered.map((trip, index) => (
+        <Reveal
+          key={trip.id}
+          delay={Math.min(index * 35, 140)}
+          style={styles.card}
+        >
+          <View style={styles.tripTopline}>
+            <Text style={styles.tripIndex}>
+              JOURNEY / {String(index + 1).padStart(2, "0")}
+            </Text>
+            <Text style={styles.tripBadge}>
+              {trip.isReturnTrip ? "RETURN" : "ONE WAY"}
+            </Text>
+          </View>
           <TouchableOpacity
             accessibilityRole="button"
             accessibilityLabel={"View trip to " + trip.destination.name}
@@ -167,7 +182,7 @@ export default function HistoryScreen({ navigation }) {
               }
             />
           </View>
-        </View>
+        </Reveal>
       ))}
       {!!history.length && (
         <DestructiveButton
@@ -254,6 +269,29 @@ export default function HistoryScreen({ navigation }) {
 }
 const createStyles = (colors) =>
   StyleSheet.create({
+    tripTopline: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 18,
+    },
+    tripIndex: {
+      color: colors.muted,
+      fontSize: 10,
+      letterSpacing: 1.5,
+      fontWeight: "800",
+    },
+    tripBadge: {
+      color: colors.primary,
+      backgroundColor: colors.primaryLight,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      fontSize: 9,
+      fontWeight: "800",
+      letterSpacing: 1,
+    },
     backupInput: {
       minHeight: 100,
       borderWidth: 1,
@@ -293,7 +331,7 @@ const createStyles = (colors) =>
     },
     card: {
       backgroundColor: colors.card,
-      padding: 16,
+      padding: 20,
       borderRadius: 26,
       borderWidth: 1,
       borderColor: colors.border,

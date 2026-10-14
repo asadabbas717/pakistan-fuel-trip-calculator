@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { AccessibilityInfo, Animated, Platform } from "react-native";
+import { AccessibilityInfo, Animated, Easing, Platform } from "react-native";
 
 export default function Reveal({ children, style, delay = 0 }) {
   const progress = useRef(new Animated.Value(1)).current;
@@ -14,7 +14,9 @@ export default function Reveal({ children, style, delay = 0 }) {
         progress.setValue(0);
         animation = Animated.timing(progress, {
           toValue: 1,
-          duration: 420,
+          duration: 360,
+          easing: Easing.out(Easing.cubic),
+          isInteraction: false,
           delay,
           useNativeDriver: Platform.OS !== "web",
         });
@@ -42,7 +44,10 @@ export default function Reveal({ children, style, delay = 0 }) {
       style={[
         style,
         {
-          opacity: progress,
+          opacity: progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.85, 1],
+          }),
           transform: [
             {
               translateY: progress.interpolate({

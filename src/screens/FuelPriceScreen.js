@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Text, TextInput, StyleSheet, View, Platform } from "react-native";
 
 import { confirmAction, showMessage } from "../utils/confirmAction";
+import SectionHeading from "../components/SectionHeading";
+import Reveal from "../components/Reveal";
 import Screen from "../components/Screen";
 import { useThemedStyles } from "../theme/ThemeContext";
 import PrimaryButton from "../components/PrimaryButton";
@@ -164,14 +166,13 @@ export default function FuelPriceScreen() {
 
   return (
     <Screen style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Pakistan Fuel Prices</Text>
+      <SectionHeading
+        eyebrow="AT THE PUMP"
+        title={"Know your\nnext fill-up."}
+        subtitle="Verified PSO benchmarks, or your actual pump price. You stay in control."
+      />
 
-      <Text style={styles.subheading}>
-        Use verified PSO publications or enter your actual pump prices. These
-        prices are saved locally on your device.
-      </Text>
-
-      <View style={styles.card}>
+      <Reveal delay={80} style={styles.card}>
         {loading ? (
           <Text style={styles.loadingText}>Loading fuel prices...</Text>
         ) : (
@@ -252,7 +253,7 @@ export default function FuelPriceScreen() {
             />
           </>
         )}
-      </View>
+      </Reveal>
 
       <View style={styles.noteCard}>
         <Text style={styles.noteTitle}>Entering prices</Text>
@@ -298,7 +299,7 @@ const createStyles = (colors) =>
     },
     card: {
       backgroundColor: colors.card,
-      padding: 16,
+      padding: 20,
       borderRadius: 26,
       borderWidth: 1,
       borderColor: colors.border,
@@ -316,10 +317,10 @@ const createStyles = (colors) =>
       marginBottom: 8,
     },
     input: {
-      height: 52,
+      minHeight: 56,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 16,
       paddingHorizontal: 12,
       backgroundColor: colors.card,
       fontSize: 16,
@@ -333,7 +334,7 @@ const createStyles = (colors) =>
     },
     noteCard: {
       backgroundColor: colors.primaryLight,
-      padding: 16,
+      padding: 20,
       borderRadius: 26,
       marginTop: 14,
     },

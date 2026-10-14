@@ -5,7 +5,7 @@ import { enqueueCollection } from "../storage/collectionQueue";
 const KEY = "FUEL_TRIP_PK_OFFICIAL_PRICES";
 const URL = serviceUrl(
   process.env.EXPO_PUBLIC_FUEL_PRICES_URL,
-  "https://raw.githubusercontent.com/asadabbas717/pakistan-fuel-trip-calculator/master/data/fuel-prices.json",
+  "https://raw.githubusercontent.com/asadabbas717/safarwise/master/data/fuel-prices.json",
 );
 export function validateOfficialPrices(value, now = Date.now()) {
   const today = new Date(now + 5 * 3600000).toISOString().slice(0, 10);

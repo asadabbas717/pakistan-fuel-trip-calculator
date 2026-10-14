@@ -20,6 +20,8 @@ This is an estimate, not navigation, a payment calculation, or a source of offic
 Use Node.js 22.13 or newer and npm. This project targets Expo SDK 57 and React Native 0.86. Use Expo Go for SDK 57 or a matching development build. Minimum platform versions are Android 7 and iOS 16.4. Later Expo Go SDK releases will need a future project upgrade; an SDK upgrade does not guarantee support for every device.
 
 ```sh
+git clone https://github.com/asadabbas717/safarwise.git
+cd safarwise
 npm ci
 npm start
 # or npm run android / npm run ios / npm run web

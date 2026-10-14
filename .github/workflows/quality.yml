@@ -15,6 +15,7 @@ jobs:
       - run: npm run check
       - run: npx expo install --check
       - run: npx --yes expo-doctor
+      - run: npm run android:preview:prepare
       - run: npm run build:web
       - run: npm run build:native
       - run: npm audit --omit=dev --audit-level=high

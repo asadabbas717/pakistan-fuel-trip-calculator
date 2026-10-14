@@ -26,7 +26,7 @@ No direct imports of these packages were found in app source. That narrows the r
 
 ## Gates before public distribution
 
-1. Finish the APK build and test that actual artifact. JavaScript exports and native prebuild alone do not satisfy this gate. See [build instructions](android-preview.md).
+1. Test the produced APK on a physical device. The cloud build succeeded, but JavaScript exports, prebuild and compilation alone do not establish runtime behavior. See [build instructions](android-preview.md).
 2. Complete the device matrix below, including permission changes and cold starts.
 3. Resolve or explicitly review dependency exposure and compatible remediations. Quality checks can pass while the dependency security gate remains red.
 4. Review Photon, OSRM and OpenStreetMap tile policies/capacity for the intended audience. Per-device throttling is not a fleet-wide quota. Keep the offline manual-distance fallback. No paid provider is required.
@@ -35,6 +35,14 @@ No direct imports of these packages were found in app source. That narrows the r
 ## Native build issue found by EAS
 
 The first cloud build reached Android resource linking and failed because the splash theme referenced `@drawable/splashscreen_logo` while the plugin had no image configured. JavaScript exports did not detect this native resource error. The config now explicitly references the existing `assets/splash-icon.png`; preview preparation checks the generated drawable, and a regression test validates the configured PNG. These are existing template assets, not final brand artwork. Expo Doctor also requested the compatible SDK 57 patch, so the app remains on SDK 57 while updating its patch version.
+
+## Produced preview artifact
+
+- [Successful EAS build](https://expo.dev/accounts/asadabbasbusiness/projects/fuel-trip-pk/builds/e53c12a8-e622-47cb-b514-dc0e18ea36a9), built from commit `77f4bb06ea252b4e17cc9e5210297aecc752155a` with package `com.fueltrippk.preview`.
+- [Download APK](https://expo.dev/artifacts/eas/HX1SLJ3WBiaffle94mh9eMlHQE619RL_aH8Hhu1Y9w0.apk). EAS reports FINISHED; a range download returned HTTP 206, a valid ZIP header and a total size of 91,379,539 bytes. This verifies artifact availability, not installation or device behavior.
+- The final account usage check confirmed the Free plan, 7 of 15 Android builds used, and estimated total charges of zero. No plan upgrade or paid worker was used.
+- Local validation: 88 app tests, 3 build-tool tests, lint/format checks and 21/21 Expo Doctor checks passed. CI now also runs native preview preparation/resource validation.
+- The next acceptance step is installing this APK and checking Clear History spacing, PDF/image sharing, Drive restore, Maps directions, system bars and keyboard behavior. Import an exported backup to populate the separate preview storage.
 
 ## Device acceptance matrix
 

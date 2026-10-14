@@ -185,18 +185,20 @@ export default function HistoryScreen({ navigation }) {
         </Reveal>
       ))}
       {!!history.length && (
-        <DestructiveButton
-          title="Clear History"
-          disabled={busy}
-          onPress={() =>
-            confirmAction("Delete all saved trip history?", () =>
-              run(async () => {
-                await clearTripHistory();
-                setHistory([]);
-              }),
-            )
-          }
-        />
+        <View style={styles.clearHistoryAction}>
+          <DestructiveButton
+            title="Clear History"
+            disabled={busy}
+            onPress={() =>
+              confirmAction("Delete all saved trip history?", () =>
+                run(async () => {
+                  await clearTripHistory();
+                  setHistory([]);
+                }),
+              )
+            }
+          />
+        </View>
       )}
       <View style={styles.card}>
         <Text style={styles.routeText}>Keep your journeys safe</Text>
@@ -269,6 +271,7 @@ export default function HistoryScreen({ navigation }) {
 }
 const createStyles = (colors) =>
   StyleSheet.create({
+    clearHistoryAction: { marginTop: 4, marginBottom: 24 },
     tripTopline: {
       flexDirection: "row",
       justifyContent: "space-between",

@@ -1,0 +1,15 @@
+{
+  "cli": { "appVersionSource": "local" },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "node": "22.23.3",
+      "env": { "FUELTRIP_BUILD_VARIANT": "preview" },
+      "android": {
+        "buildType": "apk",
+        "resourceClass": "medium",
+        "withoutCredentials": true
+      }
+    }
+  }
+}

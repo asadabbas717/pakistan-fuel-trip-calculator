@@ -12,6 +12,11 @@
       }
     },
     "android": {
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
@@ -26,7 +31,23 @@
         }
       ],
       "expo-sharing",
-      ["expo-navigation-bar", { "enforceContrast": false, "hidden": false }]
-    ]
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "hidden": false
+        }
+      ]
+    ],
+    "extra": {
+      "expo-navigation-bar": {
+        "enforceContrast": false,
+        "hidden": false
+      },
+      "eas": {
+        "projectId": "6fcc481a-943f-4784-a54d-716b15b07e41"
+      }
+    },
+    "owner": "asadabbasbusiness"
   }
 }

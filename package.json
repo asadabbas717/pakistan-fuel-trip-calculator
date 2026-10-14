@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
+    "android:preview:prepare": "node scripts/prepare-android-preview.cjs",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --runInBand",

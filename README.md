@@ -60,13 +60,13 @@ Stored routes contain precise location information. Storage is unencrypted and n
 
 ## Engineering documentation
 
-[Audit](ENGINEERING_AUDIT.md) · [Architecture](docs/architecture.md) · [Decisions](docs/decisions.md) · [Testing](docs/testing.md) · [Security](docs/security.md) · [Deployment](docs/deployment.md)
+[Audit](ENGINEERING_AUDIT.md) · [Architecture](docs/architecture.md) · [Decisions](docs/decisions.md) · [Testing](docs/testing.md) · [Security](docs/security.md) · [Deployment](docs/deployment.md) · [Android preview APK](docs/android-preview.md) · [Release readiness](docs/release-readiness.md)
 
 Developed by Asad Abbas.
 
 ## History backup and restore
 
-Open History and choose Export History Backup. On mobile, save or share the complete JSON text through your device; on web, copy the JSON shown in the backup field into a private text file. To restore, paste the full text and choose Restore History Backup, then confirm replacement. Only history is included: fuel prices and vehicle profiles remain unchanged. Invalid, oversized, unknown-version and duplicate-ID backups are rejected before writing. Keep backups private because they contain route labels and, for online trips, coordinates.
+Open **History → Export backup file** to save/share a JSON file containing trips, vehicles, prices and preferences. To restore, choose **Choose backup file**, review the validated contents, select **Merge** or **Replace**, then confirm. Legacy history-only backups remain supported. Invalid, oversized, unknown-version and duplicate-ID backups are rejected before writing. Keep backup files private because they contain locations. Restored appearance/default trip preferences may require restarting the app.
 
 ## Appearance and location suggestions
 

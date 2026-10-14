@@ -14,6 +14,7 @@ jest.mock("../src/components/Reveal", () => {
 });
 jest.mock("react-native", () => ({
   View: "View",
+  Image: "Image",
   Text: "Text",
   TextInput: "TextInput",
   ScrollView: "ScrollView",

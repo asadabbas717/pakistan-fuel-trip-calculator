@@ -14,6 +14,7 @@ import HistoryScreen from "../screens/HistoryScreen";
 import VehicleScreen from "../screens/VehicleScreen";
 import { useTheme } from "../theme/ThemeContext";
 import AppearanceScreen from "../screens/AppearanceScreen";
+import BrandLogo from "../components/BrandLogo";
 
 const Stack = createNativeStackNavigator();
 
@@ -77,7 +78,7 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: "FuelTrip PK" }}
+          options={{ title: "SafarWise", headerTitle: () => <BrandLogo /> }}
         />
 
         <Stack.Screen

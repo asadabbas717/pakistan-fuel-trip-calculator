@@ -1,4 +1,4 @@
-# FuelTrip PK
+# SafarWise
 
 React Native / Expo application for estimating fuel cost for trips in Pakistan. Select origin and destination, configure a vehicle's km/litre and a fuel price, and estimate one-way or return travel costs.
 

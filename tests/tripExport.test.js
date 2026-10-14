@@ -91,7 +91,7 @@ test("web opens and prints a complete document without calling native export", a
   global.window = { open: jest.fn(() => preview) };
   await exportTripPdf(trip);
   expect(preview.document.write).toHaveBeenCalledWith(
-    expect.stringContaining("FuelTrip PK estimate"),
+    expect.stringContaining("SafarWise estimate"),
   );
   expect(preview.document.close).toHaveBeenCalled();
   expect(preview.print).toHaveBeenCalled();

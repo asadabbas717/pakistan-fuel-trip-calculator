@@ -36,7 +36,8 @@ async function exportPath(extension) {
   const now = Date.now();
   try {
     for (const name of await FileSystem.readDirectoryAsync(directory)) {
-      const match = /^fueltrip-(\d+)-[a-z0-9]+\.(json|pdf|png)$/.exec(name);
+      const match =
+        /^(?:fueltrip|safarwise)-(\d+)-[a-z0-9]+\.(json|pdf|png)$/.exec(name);
       if (match && now - Number(match[1]) > 7 * 86400000)
         await cleanupOwnedFile(directory + name);
     }
@@ -45,7 +46,7 @@ async function exportPath(extension) {
   }
   return (
     directory +
-    `fueltrip-${now}-${Math.random().toString(36).slice(2)}.${extension}`
+    `safarwise-${now}-${Math.random().toString(36).slice(2)}.${extension}`
   );
 }
 async function shareOwnedExport(target, options) {
@@ -81,7 +82,7 @@ export async function shareExportData(
   }
 }
 export async function exportBackupFile(text) {
-  const filename = `fueltrip-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  const filename = `safarwise-backup-${new Date().toISOString().slice(0, 10)}.json`;
   if (Platform.OS === "web") {
     downloadBlob(
       new globalThis.Blob([text], { type: "application/json" }),
@@ -93,7 +94,7 @@ export async function exportBackupFile(text) {
     throw new Error("File sharing is unavailable on this device.");
   await shareExportData(text, "json", {
     mimeType: "application/json",
-    dialogTitle: "Save your FuelTrip backup",
+    dialogTitle: "Save your SafarWise backup",
     UTI: "public.json",
   });
 }

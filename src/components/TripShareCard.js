@@ -7,7 +7,7 @@ export default function TripShareCard({ trip, captureRef }) {
   return (
     <View ref={captureRef} collapsable={false} style={styles.card}>
       <View style={styles.hero}>
-        <Text style={styles.brand}>FUELTRIP PK · JOURNEY ESTIMATE</Text>
+        <Text style={styles.brand}>SAFARWISE · JOURNEY ESTIMATE</Text>
         <Text style={styles.title}>Ready for the road.</Text>
         <Text style={styles.caption}>Estimated fuel budget</Text>
         <Text style={styles.cost}>{formatPKR(trip.result.totalCost)}</Text>

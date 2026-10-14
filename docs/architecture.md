@@ -1,6 +1,6 @@
 # Architecture
 
-FuelTrip PK is a small, client-only Expo SDK 57 application. There is no backend, database, authentication, or cloud synchronization.
+SafarWise is a small, client-only Expo SDK 57 application. There is no backend, database, authentication, or cloud synchronization.
 
 ```text
 App render boundary -> React Navigation -> Screens -> Components

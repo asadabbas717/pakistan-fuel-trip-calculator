@@ -34,7 +34,7 @@ export function searchPlace(query, { signal } = {}) {
         "&limit=5&countrycode=PK&lang=en",
       {
         signal,
-        headers: { "User-Agent": "FuelTripPK/1.0", Accept: "application/json" },
+        headers: { "User-Agent": "SafarWise/1.0", Accept: "application/json" },
       },
     );
     if (!Array.isArray(data.features))

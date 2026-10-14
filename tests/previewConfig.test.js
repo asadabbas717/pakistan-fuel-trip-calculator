@@ -10,7 +10,7 @@ test("preview identity is isolated while preserving permissions and system-bar p
   process.env.FUELTRIP_BUILD_VARIANT = "preview";
   const preview = configure({ config });
   expect(preview.android.package).toBe("com.fueltrippk.preview");
-  expect(preview.name).toBe("FuelTrip PK Preview");
+  expect(preview.name).toBe("SafarWise Preview");
   expect(preview.android.permissions).toEqual(config.android.permissions);
   expect(preview.plugins).toEqual(config.plugins);
   expect(config.android.package).toBeUndefined();

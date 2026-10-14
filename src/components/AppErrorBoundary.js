@@ -6,7 +6,7 @@ export default class AppErrorBoundary extends React.Component {
     return { failed: true };
   }
   componentDidCatch() {
-    console.warn("FuelTrip PK: a screen failed to render.");
+    console.warn("SafarWise: a screen failed to render.");
   }
   render() {
     if (this.state.failed)

@@ -21,7 +21,7 @@ function webImage(trip) {
   ctx.fillRect(60, 60, 960, 360);
   ctx.fillStyle = "#14634b";
   ctx.font = "bold 24px Arial";
-  ctx.fillText("FUELTRIP PK · JOURNEY ESTIMATE", 100, 125);
+  ctx.fillText("SAFARWISE · JOURNEY ESTIMATE", 100, 125);
   ctx.fillStyle = "#202c35";
   ctx.font = "bold 64px Arial";
   ctx.fillText("Ready for the road.", 100, 225);
@@ -68,7 +68,7 @@ function webImage(trip) {
 }
 export async function shareTripImage(trip, ref) {
   if (Platform.OS === "web") {
-    downloadBlob(await webImage(trip), "fueltrip-estimate.png");
+    downloadBlob(await webImage(trip), "safarwise-estimate.png");
     return;
   }
   if (!(await Sharing.isAvailableAsync()))

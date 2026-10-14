@@ -39,7 +39,7 @@ export function tripDetails(trip) {
   return details;
 }
 export function tripHtml(trip) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>FuelTrip PK estimate</title><style>@page{size:A4;margin:18mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#202c35;margin:0;background:#fff}.hero{background:#e2f3ec;border-radius:24px;padding:32px}.brand{letter-spacing:3px;font-size:12px;color:#14634b}h1{font-size:32px;margin:18px 0}h2{font-size:38px;color:#14634b;margin:12px 0}.detail{padding:15px 0;border-bottom:1px solid #dce4e3;display:flex;justify-content:space-between;gap:24px}.value{text-align:right;max-width:70%;overflow-wrap:anywhere}.note{font-size:12px;color:#5c6b74;margin-top:24px;line-height:1.6}</style></head><body><div class="hero"><div class="brand">FUELTRIP PK · JOURNEY ESTIMATE</div><h1>Ready for the road.</h1><p>Estimated fuel budget</p><h2>${escapeHtml(formatPKR(trip.result.totalCost))}</h2></div>${tripDetails(
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>SafarWise estimate</title><style>@page{size:A4;margin:18mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#202c35;margin:0;background:#fff}.hero{background:#e2f3ec;border-radius:24px;padding:32px}.brand{letter-spacing:3px;font-size:12px;color:#14634b}h1{font-size:32px;margin:18px 0}h2{font-size:38px;color:#14634b;margin:12px 0}.detail{padding:15px 0;border-bottom:1px solid #dce4e3;display:flex;justify-content:space-between;gap:24px}.value{text-align:right;max-width:70%;overflow-wrap:anywhere}.note{font-size:12px;color:#5c6b74;margin-top:24px;line-height:1.6}</style></head><body><div class="hero"><div class="brand">SAFARWISE · JOURNEY ESTIMATE</div><h1>Ready for the road.</h1><p>Estimated fuel budget</p><h2>${escapeHtml(formatPKR(trip.result.totalCost))}</h2></div>${tripDetails(
     trip,
   )
     .map(
@@ -52,7 +52,7 @@ export function tripHtml(trip) {
 }
 export async function shareTripText(trip) {
   const message = [
-    "FuelTrip PK",
+    "SafarWise",
     ...tripDetails(trip).map(([label, value]) => `${label}: ${value}`),
     `Estimated fuel cost: ${formatPKR(trip.result.totalCost)}`,
     "Excludes tolls and parking.",
@@ -60,7 +60,7 @@ export async function shareTripText(trip) {
   if (Platform.OS === "web" && !globalThis.navigator.share) {
     downloadBlob(
       new globalThis.Blob([message], { type: "text/plain" }),
-      "fueltrip-estimate.txt",
+      "safarwise-estimate.txt",
     );
     return;
   }

@@ -18,7 +18,7 @@ export function parseBackup(text) {
     throw new Error("This file is not valid JSON.");
   }
   if (value?.app !== "FuelTripPK")
-    throw new Error("Choose a FuelTrip PK backup file.");
+    throw new Error("Choose a SafarWise backup file.");
   if (value.version === 1 && value.kind === "trip-history") {
     validateSavedTrips(value.trips);
     return value;

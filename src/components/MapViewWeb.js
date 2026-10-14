@@ -90,7 +90,7 @@ function MapViewWeb({ start, destination, routeCoordinates }) {
           onHttpError={fail}
           onRenderProcessGone={fail}
           onContentProcessDidTerminate={fail}
-          userAgent="FuelTripPK/1.0 (https://github.com/asadabbas717/pakistan-fuel-trip-calculator)"
+          userAgent="SafarWise/1.0 (https://github.com/asadabbas717/pakistan-fuel-trip-calculator)"
           cacheEnabled
           style={styles.webview}
         />

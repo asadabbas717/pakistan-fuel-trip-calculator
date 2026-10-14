@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FuelTrip PK",
+    "name": "SafarWise",
     "slug": "fuel-trip-pk",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "FuelTrip PK uses your location to calculate trip distance and fuel cost."
+        "NSLocationWhenInUseUsageDescription": "SafarWise uses your location to calculate trip distance and fuel cost."
       }
     },
     "android": {
@@ -20,16 +20,20 @@
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/branding/safarwise/favicon.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash-icon.png",
+          "image": "./assets/branding/safarwise/launcher.png",
           "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#F7FAF7"
+          "backgroundColor": "#F5F6F2",
+          "dark": {
+            "image": "./assets/branding/safarwise/launcher.png",
+            "backgroundColor": "#111A20"
+          }
         }
       ],
       "expo-sharing",
@@ -50,6 +54,7 @@
         "projectId": "6fcc481a-943f-4784-a54d-716b15b07e41"
       }
     },
-    "owner": "asadabbasbusiness"
+    "owner": "asadabbasbusiness",
+    "icon": "./assets/branding/safarwise/launcher.png"
   }
 }

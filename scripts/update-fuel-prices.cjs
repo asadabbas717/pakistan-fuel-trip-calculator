@@ -4,7 +4,7 @@ async function main() {
   const response = await fetch(SOURCE_URL, {
     signal: globalThis.AbortSignal.timeout(20000),
     headers: {
-      "User-Agent": "FuelTripPK-price-checker/1.0",
+      "User-Agent": "SafarWise-price-checker/1.0",
       Accept: "text/html",
     },
   });

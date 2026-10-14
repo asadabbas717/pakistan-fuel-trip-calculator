@@ -77,8 +77,7 @@ test("confirmation executes once despite repeated taps and queues themed feedbac
   expect(
     renderer.root
       .findAllByType("Text")
-      .find((node) => node.props.children === "FuelTrip PK").props.style[1]
-      .color,
+      .find((node) => node.props.children === "SafarWise").props.style[1].color,
   ).toBe("#F0F4F5");
 });
 test("queued notifications retain order and non-destructive confirmations retain their label", () => {

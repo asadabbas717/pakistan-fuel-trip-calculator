@@ -16,7 +16,7 @@ export function dismissDialog(dialog) {
   emit();
   return true;
 }
-export function showMessage(message, title = "FuelTrip PK") {
+export function showMessage(message, title = "SafarWise") {
   queue = [...queue, { message: String(message), title, label: "OK" }];
   emit();
 }

@@ -1,6 +1,6 @@
 # Android preview APK
 
-The `preview` profile creates an installable APK named **FuelTrip PK Preview** with package `com.fueltrippk.preview`. It has separate storage from Expo Go and any future production app. Export a backup from the existing app and import it into the preview if you want the same trips and settings.
+The `preview` profile creates an installable APK named **SafarWise Preview** with package `com.fueltrippk.preview`. It has separate storage from Expo Go and any future production app. Export a backup from the existing app and import it into the preview if you want the same trips and settings.
 
 ## Expo cloud build
 

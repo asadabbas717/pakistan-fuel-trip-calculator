@@ -2,7 +2,7 @@ module.exports = ({ config }) => {
   if (process.env.FUELTRIP_BUILD_VARIANT !== "preview") return config;
   return {
     ...config,
-    name: "FuelTrip PK Preview",
+    name: "SafarWise Preview",
     android: {
       ...config.android,
       package: "com.fueltrippk.preview",

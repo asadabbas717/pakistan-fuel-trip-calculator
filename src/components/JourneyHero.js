@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Image, View, Text, StyleSheet } from "react-native";
 import Reveal from "./Reveal";
 import RouteArtwork from "./RouteArtwork";
 import { useThemedStyles } from "../theme/ThemeContext";
@@ -25,12 +25,24 @@ export default function JourneyHero({
       </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
+      <Image
+        source={require("../../assets/branding/safarwise/journey.jpg")}
+        resizeMode="cover"
+        accessible={false}
+        style={styles.landscape}
+      />
       <RouteArtwork />
     </Reveal>
   );
 }
 const createStyles = (c) =>
   StyleSheet.create({
+    landscape: {
+      width: "100%",
+      height: 150,
+      borderRadius: 18,
+      marginTop: 22,
+    },
     hero: {
       backgroundColor: c.hero,
       borderRadius: 30,

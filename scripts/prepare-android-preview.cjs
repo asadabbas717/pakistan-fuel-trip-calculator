@@ -43,3 +43,22 @@ try {
 }
 if (result.error) throw result.error;
 process.exitCode = result.status ?? 1;
+if (result.status === 0) {
+  const resources = path.join(nativeDirectory, "app", "src", "main", "res");
+  const styles = fs.readFileSync(
+    path.join(resources, "values", "styles.xml"),
+    "utf8",
+  );
+  const hasSplashLogo = fs
+    .readdirSync(resources)
+    .filter((name) => name.startsWith("drawable"))
+    .some((name) =>
+      ["splashscreen_logo.png", "splashscreen_logo.xml"].some((file) =>
+        fs.existsSync(path.join(resources, name, file)),
+      ),
+    );
+  if (styles.includes("@drawable/splashscreen_logo") && !hasSplashLogo)
+    throw new Error(
+      "Generated splash theme references a missing logo. Configure a valid expo-splash-screen image before compiling the APK.",
+    );
+}

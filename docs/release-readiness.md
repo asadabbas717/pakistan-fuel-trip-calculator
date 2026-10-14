@@ -32,6 +32,10 @@ No direct imports of these packages were found in app source. That narrows the r
 4. Review Photon, OSRM and OpenStreetMap tile policies/capacity for the intended audience. Per-device throttling is not a fleet-wide quota. Keep the offline manual-distance fallback. No paid provider is required.
 5. Finish the app icon/splash, permanent application identity, private production signing, privacy notice/contact and store declarations. No store submission has been configured.
 
+## Native build issue found by EAS
+
+The first cloud build reached Android resource linking and failed because the splash theme referenced `@drawable/splashscreen_logo` while the plugin had no image configured. JavaScript exports did not detect this native resource error. The config now explicitly references the existing `assets/splash-icon.png`; preview preparation checks the generated drawable, and a regression test validates the configured PNG. These are existing template assets, not final brand artwork. Expo Doctor also requested the compatible SDK 57 patch, so the app remains on SDK 57 while updating its patch version.
+
 ## Device acceptance matrix
 
 | Check                                                                        | Evidence/status                                                                                         |

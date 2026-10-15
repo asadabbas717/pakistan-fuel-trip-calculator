@@ -1,8 +1,8 @@
 # Build and release
 
-Use Node.js 22.13 or newer and npm ci from the committed lockfile. Set public provider endpoints before exporting. Run npm run check, npx expo install --check, npx expo-doctor, npm run build:web, npm run build:native, and npm audit. dist is generated and ignored.
+Use Node.js 22.13 or newer and npm ci from the committed lockfile. Set public provider endpoints before exporting. Run npm run check, npx expo install --check, npx expo-doctor, npm run build:web, npm run build:native, and npm run audit:security. dist is generated and ignored.
 
-The CI pipeline runs clean installation, lint/format/tests, SDK compatibility validation, Android preview prebuild/resource checks, web/native exports, and a high-severity dependency audit. The audit is a real gate and currently has unresolved findings; do not describe the pipeline as fully green until these are resolved or formally reviewed.
+The CI pipeline runs clean installation, lint/format/tests, SDK compatibility validation, Android preview prebuild/resource checks, web/native exports, and a dependency security gate. It verifies pinned source backports and exploit regressions before assessing live registry findings. New advisories, missing/modified patches and expired reviews fail the gate. The raw audit is retained as a CI artifact; see [security backports](../security/README.md).
 
 Exports contain JavaScript and assets, not signed binaries. The isolated EAS preview APK profile is documented in [Android preview](android-preview.md). Production store identifiers, private release signing, hosting, OTA updates and service accounts still require maintainer decisions. A maintainer must select provider capacity and terms, verify a development build on actual Android/iOS devices, configure signing and platform identifiers, and run accessibility/privacy checks before distribution. Validate native file replacement and recovery across restart and simulated storage failures.
 

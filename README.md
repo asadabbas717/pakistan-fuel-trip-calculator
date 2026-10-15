@@ -41,10 +41,10 @@ npm run format        # apply formatting
 npx expo install --check
 npm run build:web
 npm run build:native  # Android and iOS JavaScript/assets export
-npm audit
+npm run audit:security
 ```
 
-Exports are bundle checks, not signed APK/IPA builds. CI runs these checks and a high-severity dependency security gate. Known unresolved advisories currently prevent a clean security gate; see ENGINEERING_AUDIT.md. No deployment or store submission is configured.
+Exports are bundle checks, not signed APK/IPA builds. CI runs these checks and a dependency security gate that verifies source backports and assesses live registry findings. Raw npm audit still flags locally patched upstream versions; see [the remediation record](security/README.md). No deployment or store submission is configured.
 
 ## Architecture and structure
 

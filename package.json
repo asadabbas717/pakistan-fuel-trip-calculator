@@ -14,14 +14,17 @@
     "format:check": "prettier --check .",
     "build:web": "expo export --platform web",
     "build:native": "expo export --platform android --platform ios",
-    "check": "npm run lint && npm run format:check && npm test && npm run test:build-tools",
+    "check": "npm run lint && npm run format:check && npm test && npm run test:build-tools && npm run test:security",
     "test:build-tools": "node --test tests/build-tools.test.cjs tests/fuel-price-parser.test.cjs",
-    "update:fuel-prices": "node scripts/update-fuel-prices.cjs"
+    "update:fuel-prices": "node scripts/update-fuel-prices.cjs",
+    "postinstall": "node scripts/dependency-patches.cjs",
+    "audit:security": "node scripts/audit-security.cjs",
+    "test:security": "node --test tests/dependency-security.test.cjs"
   },
   "dependencies": {
     "@react-navigation/native": "^7.3.0",
     "@react-navigation/native-stack": "^7.17.1",
-    "expo": "~57.0.29",
+    "expo": "~57.0.30",
     "expo-document-picker": "~57.0.3",
     "expo-file-system": "~57.0.7",
     "expo-location": "~57.0.21",
@@ -70,6 +73,9 @@
     ]
   },
   "overrides": {
-    "react-server-dom-webpack": "19.1.9"
+    "react-server-dom-webpack": "19.1.9",
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   }
 }

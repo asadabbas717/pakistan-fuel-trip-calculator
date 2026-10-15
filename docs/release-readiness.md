@@ -13,6 +13,8 @@ Scope: current app source, dependency lockfile, native preview generation, free-
 
 ## Dependency findings
 
+**Remediation update:** The original registry findings below are retained as historical context. See [dependency security backports](../security/README.md) for the scoped UUID update, pinned source fixes and fail-closed live audit gate. Raw npm counts still include versions with verified local backports; they are not a current count of unremediated issues.
+
 Registry scans on this date reported **63 affected package entries** (49 high, 14 moderate, no critical). With `--omit=dev`, npm still reports **41 entries** (27 high, 14 moderate). These counts include dependency chains, not 63 independent vulnerabilities. Expo's CLI/configuration tools also occur in the production dependency graph; `--omit=dev` does not establish APK runtime reachability.
 
 | Root advisory                                                                          | Installed/published latest checked         | Decision                                                                               |
@@ -22,13 +24,13 @@ Registry scans on this date reported **63 affected package entries** (49 high, 1
 | [sprintf-js precision DoS](https://github.com/advisories/GHSA-hp3w-g68c-fv3c)          | 1.1.3                                      | No published patched version found; do not accept untrusted format strings in tooling. |
 | [uuid output buffer bounds](https://github.com/advisories/GHSA-w5hq-g745-h8pq)         | 7.0.3 installed under xcode; latest 14.0.3 | A major transitive replacement needs compatibility review; do not force it globally.   |
 
-No direct imports of these packages were found in app source. That narrows the review but does not certify that none can enter a bundle transitively. Keep the existing CI high-severity audit gate; do not suppress findings or run `npm audit fix --force`. Its suggested Expo/RN downgrades would conflict with SDK 57.
+No direct imports of these packages were found in app source. The remediated CI gate verifies source backports and exploit regressions before assessing the unchanged registry report; it rejects new findings and expired reviews. Do not run `npm audit fix --force`: its suggested Expo/RN downgrades conflict with SDK 57.
 
 ## Gates before public distribution
 
 1. Test the produced APK on a physical device. The cloud build succeeded, but JavaScript exports, prebuild and compilation alone do not establish runtime behavior. See [build instructions](android-preview.md).
 2. Complete the device matrix below, including permission changes and cold starts.
-3. Resolve or explicitly review dependency exposure and compatible remediations. Quality checks can pass while the dependency security gate remains red.
+3. Maintain the pinned security backports and their review deadline, replace them with compatible upstream fixes when available, and require the dependency security gate to pass. See the remediation record.
 4. Review Photon, OSRM and OpenStreetMap tile policies/capacity for the intended audience. Per-device throttling is not a fleet-wide quota. Keep the offline manual-distance fallback. No paid provider is required.
 5. Finish the app icon/splash, permanent application identity, private production signing, privacy notice/contact and store declarations. No store submission has been configured.
 

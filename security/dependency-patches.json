@@ -1,0 +1,115 @@
+{
+  "reviewedAt": "2026-10-15",
+  "reviewBy": "2026-11-15",
+  "advisories": {
+    "GHSA-vfj7-8cjw-p6xm": {
+      "name": "braces",
+      "version": "3.0.3",
+      "reason": "Reject excessive parser nesting and preflight all recursive AST walkers."
+    },
+    "GHSA-86w9-cpqp-85rv": {
+      "name": "node-forge",
+      "version": "1.4.0",
+      "reason": "Backport nested DigestAlgorithm element count validation from upstream PR 1152."
+    },
+    "GHSA-hp3w-g68c-fv3c": {
+      "name": "sprintf-js",
+      "version": "1.0.3",
+      "reason": "Bound width and precision before formatting or caching parsed placeholders."
+    }
+  },
+  "patches": [
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "file": "lib/parse.js",
+      "beforeSha256": "e572166565f15fa6ad9865ae49d678218e32aabfd1b3720f6d0d43d39800d310",
+      "afterSha256": "919e2e613c5de9526f453e600c889f57986d8bd1c4b717b2c0c44da71372b3f0",
+      "replacements": [
+        {
+          "from": "      stack.push(block);",
+          "to": "      if (stack.length >= 128) throw new RangeError('Brace nesting exceeds safe limit');\n      stack.push(block);",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "file": "lib/compile.js",
+      "beforeSha256": "dc98f22eee3d511785d92a00758d5f0d48efed5f5813bdecc2de430c529b5c9f",
+      "afterSha256": "32f143f9f786b7505df050d6e036821259445b8df6d9f5919e88821cbe324be4",
+      "replacements": [
+        {
+          "from": "const compile = (ast, options = {}) => {",
+          "to": "const compile = (ast, options = {}) => {\n  require('./check-depth')(ast);",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "file": "lib/expand.js",
+      "beforeSha256": "41ccc196ebfa7b7781a634e721eb744e4e7bcb54cba427a7e3d6806a1b9e58f7",
+      "afterSha256": "3842143c6612c0b299387329bc9b260be4ad56b857bc1ce3660598476d7c3114",
+      "replacements": [
+        {
+          "from": "const expand = (ast, options = {}) => {",
+          "to": "const expand = (ast, options = {}) => {\n  require('./check-depth')(ast);",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "file": "lib/stringify.js",
+      "beforeSha256": "379f22d77bfa1478341ccd49c5e4267464aabcbba03558bab332aac23fc6f23a",
+      "afterSha256": "f8354e0106f903bc8945b4990b984941f12339b4c956a1705551d12820573b8a",
+      "replacements": [
+        {
+          "from": "module.exports = (ast, options = {}) => {",
+          "to": "module.exports = (ast, options = {}) => {\n  require('./check-depth')(ast);",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "file": "lib/check-depth.js",
+      "beforeSha256": null,
+      "afterSha256": "9ce1483850b2b1db0fdff4d8da23f1fa2227465c9714927150b5f5161e0adf1a",
+      "content": "'use strict';\n// SafarWise backport: bound AST traversal before recursive braces walkers.\nmodule.exports = function checkDepth(root) {\n  const stack = [[root, 0]];\n  const seen = new Set();\n  while (stack.length) {\n    const [node, depth] = stack.pop();\n    if (!node || typeof node !== 'object') continue;\n    if (depth > 128 || seen.has(node) || seen.size >= 100000) {\n      throw new RangeError('Brace nesting exceeds safe limit');\n    }\n    seen.add(node);\n    if (Array.isArray(node.nodes)) {\n      for (const child of node.nodes) stack.push([child, depth + 1]);\n    }\n  }\n};\n"
+    },
+    {
+      "name": "node-forge",
+      "version": "1.4.0",
+      "file": "lib/rsa.js",
+      "beforeSha256": "fd4740238145ec26470eb3f06a627c72039538ce1307dbdce40521f94dfd0a50",
+      "afterSha256": "ddb9a2c4ef6d46d4b2116b0a599356a57d2af30d002f6561124a723b692e306a",
+      "replacements": [
+        {
+          "from": "            obj.value.length !== 2) {",
+          "to": "            obj.value.length !== 2 ||\n            obj.value[0].value.length !==\n              (Object.prototype.hasOwnProperty.call(capture, 'parameters') ? 2 : 1) ||\n            (Object.prototype.hasOwnProperty.call(capture, 'parameters') &&\n              capture.parameters !== '')) {",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "sprintf-js",
+      "version": "1.0.3",
+      "file": "src/sprintf.js",
+      "beforeSha256": "9904b0d448280bfdfcb0329bdac995883033597727404f9c058d051d9174b7c7",
+      "afterSha256": "f20f3fc01ae0d8e13733c7cdfec96dbc3b868b970ace10e908726dc2f64e2b39",
+      "replacements": [
+        {
+          "from": "            else if ((match = re.placeholder.exec(_fmt)) !== null) {",
+          "to": "            else if ((match = re.placeholder.exec(_fmt)) !== null) {\n                if (Number(match[6]) > 10000 || Number(match[7]) > 10000) {\n                    throw new RangeError(\"[sprintf] width or precision exceeds safe limit\")\n                }",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}

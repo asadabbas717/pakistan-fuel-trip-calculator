@@ -2,6 +2,12 @@
 
 React Native / Expo application for estimating fuel cost for trips in Pakistan. Select origin and destination, configure a vehicle's km/litre and a fuel price, and estimate one-way or return travel costs.
 
+## Ownership and license
+
+Copyright (c) 2026 the SafarWise project owner, identified by GitHub account [asadabbas717](https://github.com/asadabbas717). Original project material is provided under the [SafarWise Source-Available License](LICENSE); it is not offered under an open-source license. Viewing, GitHub forking, private evaluation/testing and preparing contributions are permitted as specified in that license. Cloning or forking does not transfer ownership of the original code.
+
+**Publishing or distributing this app or modified versions on Play Store, other stores, websites or other channels requires the owner's prior written permission, even if free.** Attribution or renaming the app does not substitute for permission. Third-party components retain their own licenses. See [contribution and ownership requirements](CONTRIBUTING.md) before submitting code.
+
 ## Features and scope
 
 - Manual one-way distance entry works offline, without GPS or any API/service.

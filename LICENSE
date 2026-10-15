@@ -1,0 +1,63 @@
+SafarWise Source-Available License 1.0
+Effective date: 16 October 2026
+
+Copyright (c) 2026 the SafarWise project owner, identified by the GitHub
+account asadabbas717 (https://github.com/asadabbas717).
+All rights reserved except as expressly granted below.
+
+1. Scope and ownership
+These terms cover original copyrightable SafarWise code, documentation and
+other project material only to the extent the project owner holds rights in
+that material (the "Software"). Viewing, cloning, forking or modifying the
+Software does not transfer ownership of the original Software. All rights
+not expressly granted are reserved. This is a restrictive source-available
+license, not an open-source license.
+
+2. Limited permission
+You may view the Software and make private local copies, modifications and
+test builds solely for personal evaluation, study, testing and preparing
+contributions to the official project. You may submit proposed changes and
+the excerpts needed to discuss them through the official project's issues
+and pull requests. Retain copyright, license and attribution notices.
+GitHub users may also use GitHub's viewing, forking and collaboration
+features as permitted by GitHub's applicable Terms of Service. These terms
+do not attempt to revoke rights granted under those terms or applicable law.
+
+3. Publication and reuse require permission
+Except for section 2, you must obtain the project owner's prior written
+permission before distributing, publishing, sublicensing, selling, hosting
+for others or otherwise making the Software or modified versions available
+to others, whether free of charge or for payment. This includes publishing
+apps, APKs, app bundles, web deployments or other builds on Google Play,
+Apple's App Store, other stores, download sites or any other distribution
+channel. Incorporating the Software into another product also requires
+prior written permission. A different name, package identifier, appearance
+or attribution does not by itself grant permission to republish.
+
+4. Attribution and branding
+You must not claim authorship or ownership of the original Software, remove
+its ownership notices or represent an unofficial copy as the official
+SafarWise app. No trademark or branding rights are granted by this license.
+Refer to the official project through
+https://github.com/asadabbas717/safarwise for permission requests.
+
+5. Contributions
+Submitting a contribution does not by itself assign its copyright to the
+project owner. Copyrightable external code contributions require the
+owner's separate review and any necessary signed copyright assignment
+before acceptance into the official project. See CONTRIBUTING.md.
+
+6. Third-party material and prior rights
+Third-party components retain their respective copyrights and licenses.
+These terms do not replace or restrict rights independently granted by
+those licenses, including the Leaflet BSD 2-Clause license retained at
+src/vendor/LEAFLET_LICENSE.txt. They do not assert ownership of facts,
+third-party works or independently developed code. Existing rights and
+applicable statutory exceptions are not revoked by these terms.
+
+7. Disclaimer
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. TO THE EXTENT PERMITTED BY APPLICABLE LAW,
+THE COPYRIGHT HOLDERS SHALL NOT BE LIABLE FOR CLAIMS, DAMAGES OR OTHER
+LIABILITY ARISING FROM USE OF THE SOFTWARE.
